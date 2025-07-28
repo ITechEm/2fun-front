@@ -9,6 +9,7 @@ import Table from "@/components/Table";
 import Input from "@/components/Input";
 import {RevealWrapper} from "next-reveal";
 import {useSession} from "next-auth/react";
+import { useRouter } from 'next/router';  // <-- Added this import
 
 const ColumnsWrapper = styled.div`
   display: grid;
@@ -83,10 +84,45 @@ const CityHolder = styled.div`
   display:flex;
   gap: 5px;
 `;
+const Overlay = styled.div`
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+`;
+
+const PopupBox = styled.div`
+  background: white;
+  padding: 20px 30px;
+  border-radius: 8px;
+  max-width: 400px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  text-align: center;
+`;
+
+const CloseBtn = styled.button`
+  margin-top: 15px;
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  &:hover {
+    background: #c0392b;
+  }
+`;
 
 export default function CartPage() {
   const {cartProducts,addProduct,removeProduct,clearCart} = useContext(CartContext);
   const {data:session} = useSession();
+  const router = useRouter();  // <-- Initialize router
+
   const [products,setProducts] = useState([]);
   const [name,setName] = useState('');
   const [email,setEmail] = useState('');
@@ -97,6 +133,16 @@ export default function CartPage() {
   const [country,setCountry] = useState('');
   const [isSuccess,setIsSuccess] = useState(false);
   const [shippingFee, setShippingFee] = useState(null);
+  const [popupMessage, setPopupMessage] = useState(null);
+
+  function closePopup() {
+    setPopupMessage(null);
+  }
+
+  function goToProfile() {
+    router.push('/profile');  // Redirect to profile page
+  }
+  
   useEffect(() => {
     if (cartProducts.length > 0) {
       axios.post('/api/cart', {ids:cartProducts})
@@ -107,6 +153,7 @@ export default function CartPage() {
       setProducts([]);
     }
   }, [cartProducts]);
+
   useEffect(() => {
     if (typeof window === 'undefined') {
       return;
@@ -119,6 +166,7 @@ export default function CartPage() {
       setShippingFee(res.data.value);
     })
   }, []);
+
   useEffect(() => {
     if (!session) {
       return;
@@ -133,6 +181,7 @@ export default function CartPage() {
       setCountry(response.data.country);
     });
   }, [session]);
+
   function moreOfThisProduct(id) {
     addProduct(id);
   }
@@ -140,14 +189,44 @@ export default function CartPage() {
     removeProduct(id);
   }
   async function goToPayment() {
+    if (!name || !name.trim()) {
+      setPopupMessage('The Name is required!\nPlease update your Profile');
+      return;
+    }
+    if (!email || !email.trim()) {
+      setPopupMessage('The Email is required!\nPlease update your Profile');
+      return;
+    }
+    if (!phone || !(typeof phone === 'string' ? phone.trim() : String(phone).trim())) {
+  setPopupMessage('The Phone Number is required!\nPlease update your Profile');
+  return;
+}
+    if (!streetAddress || !streetAddress.trim()) {
+      setPopupMessage('The Street Address is required!\nPlease update your Profile');
+      return;
+    }
+    if (!city || !city.trim()) {
+      setPopupMessage('The City is required!\nPlease update your Profile');
+      return;
+    }
+    if (!postalCode || !postalCode.trim()) {
+      setPopupMessage('The Postal Code is required!\nPlease update your Profile');
+      return;
+    }
+    if (!country || !country.trim()) {
+      setPopupMessage('The Country is required!\nPlease update your Profile');
+      return;
+    }
+
     const response = await axios.post('/api/checkout', {
-      name,email,city,phone,postalCode,streetAddress,country,
+      name, email, city, phone, postalCode, streetAddress, country,
       cartProducts,
     });
     if (response.data.url) {
       window.location = response.data.url;
     }
   }
+
   let productsTotal = 0;
   for (const productId of cartProducts) {
     const price = products.find(p => p._id === productId)?.price || 0;
@@ -169,6 +248,7 @@ export default function CartPage() {
       </>
     );
   }
+
   return (
     <>
       <Header />
@@ -233,44 +313,30 @@ export default function CartPage() {
             <RevealWrapper delay={100}>
               <Box>
                 <h2>Order information</h2>
-                <Input type="text"
-                       placeholder="Name"
+                <Input 
                        value={name}
-                       name="name"
-                       onChange={ev => setName(ev.target.value)} />
-                <Input type="text"
-                       placeholder="Email"
+                       disabled />
+                <Input 
                        value={email}
-                       name="email"
-                       onChange={ev => setEmail(ev.target.value)}/>
+                       disabled/>
 
-                <Input type="text"
-                       placeholder="Phone"
+                <Input 
                        value={phone}
-                       name="phone"
-                       onChange={ev => setphone(ev.target.value)}/>
-                <Input type="text"
-                       placeholder="Street Address"
+                       disabled/>
+                <Input 
                        value={streetAddress}
-                       name="streetAddress"
-                       onChange={ev => setStreetAddress(ev.target.value)}/>
+                       disabled/>
                 <CityHolder>
-                  <Input type="text"
-                         placeholder="City"
+                  <Input 
                          value={city}
-                         name="city"
-                         onChange={ev => setCity(ev.target.value)}/>
-                  <Input type="text"
-                         placeholder="Postal Code"
+                         disabled/>
+                  <Input 
                          value={postalCode}
-                         name="postalCode"
-                         onChange={ev => setPostalCode(ev.target.value)}/>
+                         disabled/>
                 </CityHolder>
-                <Input type="text"
-                       placeholder="Country"
+                <Input 
                        value={country}
-                       name="country"
-                       onChange={ev => setCountry(ev.target.value)}/>
+                       disabled/>
                 <Button black block
                         onClick={goToPayment}>
                   Continue to payment
@@ -280,6 +346,27 @@ export default function CartPage() {
           )}
         </ColumnsWrapper>
       </Center>
+      {popupMessage && (
+        <Overlay>
+          <PopupBox>
+  <pre style={{ whiteSpace: 'pre-wrap', margin: 0, justifyContent: 'center',  gap: '10px', marginTop: '15px'}}>{popupMessage}</pre>
+  <CloseBtn onClick={closePopup}>Close</CloseBtn>
+  <CloseBtn onClick={goToProfile} style={{ backgroundColor: '#3498db', marginLeft: '15px' }}>
+    Go to Profile
+  </CloseBtn>
+</PopupBox>
+
+          {/* <PopupBox>
+            <h3>{popupMessage}</h3>
+            <div style={{ whiteSpace: 'pre-wrap', margin: 0 , justifyContent: 'center', gap: '10px', marginTop: '15px' }}>
+              <CloseBtn onClick={closePopup}>Close</CloseBtn>
+              <CloseBtn onClick={goToProfile} style={{ backgroundColor: '#3498db' }}>
+                Go to Profile
+              </CloseBtn>
+            </div>
+          </PopupBox> */}
+        </Overlay>
+      )}
     </>
   );
 }

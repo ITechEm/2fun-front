@@ -38,6 +38,21 @@ const WishedProductsGrid = styled.div`
     grid-template-columns: 1fr;
   }
 `;
+const PhoneInputWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  input {
+    flex: 1;
+  }
+  span {
+    background: #f0f0f0;
+    padding: 0 10px;
+    border: 1px solid #ccc;
+    border-right: none;
+    border-radius: 5px 0 0 5px;
+  }
+`;
+
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('Orders');
@@ -179,10 +194,10 @@ export default function ProfilePage() {
                     disabled
                   />
                   <Input
-                    type="text"
-                    placeholder="Phone Number"
-                    value={phone}
-                    onChange={e => setphone(e.target.value)}
+                  type="text"
+                  placeholder="(+)407xx xxx xxx"
+                  value={phone}
+                  onChange={e => setphone(e.target.value)}
                   />
                   <Input
                     type="text"
@@ -198,10 +213,10 @@ export default function ProfilePage() {
                       onChange={e => setCity(e.target.value)}
                     />
                     <Input
-                      type="text"
-                      placeholder="Postal Code"
-                      value={postalCode}
-                      onChange={e => setPostalCode(e.target.value)}
+                     type="text"
+                     placeholder="Postal Code"
+                     value={postalCode}
+                     onChange={e => setPostalCode(e.target.value)}
                     />
                   </CityHolder>
 
