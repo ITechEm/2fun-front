@@ -56,7 +56,7 @@ export default function CategoriesPage({mainCategories,categoriesProducts,wished
       <Header />
       <Center>
         {mainCategories.map(cat => (
-          <CategoryWrapper>
+          <CategoryWrapper key={cat._id}>
             <CategoryTitle>
               <h2>{cat.name}</h2>
               <div>
