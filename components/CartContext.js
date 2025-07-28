@@ -28,8 +28,11 @@ export function CartContextProvider({children}) {
     });
   }
   function clearCart() {
-    setCartProducts([]);
+  setCartProducts([]);
+  if (ls) {
+    ls.removeItem('cart');
   }
+}
   return (
     <CartContext.Provider value={{cartProducts,setCartProducts,addProduct,removeProduct,clearCart}}>
       {children}

@@ -56,6 +56,9 @@ export default function ProfilePage() {
   const [postalCode, setPostalCode] = useState('');
   const [country, setCountry] = useState('');
 
+  // NEW: popup state
+  const [showSavedPopup, setShowSavedPopup] = useState(false);
+
   // Fetch data
   useEffect(() => {
     setWishlistLoaded(false);
@@ -84,9 +87,17 @@ export default function ProfilePage() {
     });
   }, []);
 
-  function saveAddress() {
-    const data = { name, email, city, phone, postalCode, country };
-    axios.put('/api/address', data);
+  // Updated saveAddress with popup logic
+  async function saveAddress() {
+    const data = { name, email, city, phone, streetAddress, postalCode, country };
+    try {
+      await axios.put('/api/address', data);
+      setShowSavedPopup(true);
+      setTimeout(() => setShowSavedPopup(false), 3000); // Hide after 3 seconds
+    } catch (error) {
+      console.error('Failed to save address:', error);
+      // Optionally, show error message here
+    }
   }
 
   function productRemovedFromWishlist(idToRemove) {
@@ -164,9 +175,8 @@ export default function ProfilePage() {
                     onChange={e => setName(e.target.value)}
                   />
                   <Input
-                    
                     value={email}
-                    disabled 
+                    disabled
                   />
                   <Input
                     type="text"
@@ -194,7 +204,7 @@ export default function ProfilePage() {
                       onChange={e => setPostalCode(e.target.value)}
                     />
                   </CityHolder>
-                  
+
                   <Input
                     type="text"
                     placeholder="Country"
@@ -209,7 +219,30 @@ export default function ProfilePage() {
             </WhiteBox>
           </div>
         </ColsWrapper>
+
+        {/* Popup */}
+        {showSavedPopup && (
+  <div style={{
+    position: 'fixed',
+    top: '20px', // Move it to the top
+    left: '50%', // Position it horizontally in the center
+    transform: 'translateX(-50%)', // Adjust by 50% of its own width to truly center it
+    backgroundColor: '#4BB543',
+    color: 'white',
+    padding: '12px 24px',
+    borderRadius: '8px',
+    boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+    fontWeight: 'bold',
+    zIndex: 1000,
+    opacity: showSavedPopup ? 1 : 0,
+    transform: showSavedPopup ? 'translateY(0) translateX(-50%)' : 'translateY(10px) translateX(-50%)', // Handle translation when showing
+    transition: 'opacity 0.3s ease, transform 0.3s ease',
+  }}>
+    Settings saved!
+  </div>
+)}
       </Center>
     </>
   );
 }
+
