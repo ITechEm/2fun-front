@@ -3,27 +3,32 @@ import Layout from "@/pages/layout";
 
 const styles = {
   container: {
-    fontFamily: 'Arial, sans-serif',
-    textAlign: 'center',
-
-
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center', 
+    justifyContent: 'center',
+    maxWidth: '800px', 
+    margin: 'auto', 
+    padding: '20px',
+    backgroundColor: '#fff', 
+    borderRadius: '8px',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    marginTop:'50px',
+    marginBottom:'50px'
   },
   heading: {
     fontSize: '36px',
     fontWeight: 'bold',
+    textAlign: 'center',
     marginBottom: '20px',
-    color: '#333'
+    color: '#333',
   },
   paragraph: {
     fontSize: '18px',
     lineHeight: '1.6',
     marginBottom: '20px',
-    color: '#555'
-  },
-  wrapper: {
-    display: 'flex',
-    flexDirection: 'column',
-    minHeight: '100vh',        
+    color: '#555',
+    textAlign: 'center',
   },
 };
 
@@ -31,7 +36,7 @@ const styles = {
 const Returns = () => {
   return (
   <Layout>
-    <div style={styles.container}>
+   <div style={styles.container}>
       <h1 style={styles.heading}>Returns Policy</h1>
       <p style={styles.paragraph}>
         At 2fun.shops, we take great pride in creating personalized products tailored to your unique preferences. Each item is made to order specifically for you, which makes it one-of-a-kind. Because of this, we are unable to accept returns or exchanges for any personalized products.

@@ -20,7 +20,7 @@ const ColsWrapper = styled.div`
 
 const Title = styled.h2`
   font-size: 32px;
-  color: #d44200;
+  color: #1f1f1f;
   text-align: center;
   margin-bottom: 30px;
   font-family: 'Georgia', serif;
@@ -34,7 +34,7 @@ const StyledInput = styled(Input)`
 `;
 
 const StyledButton = styled(Button)`
-  background-color: #7a4c1e;
+  background-color: #1f1f1f;
   color: white;
   border-radius: 999px;
   padding: 12px;
@@ -43,7 +43,7 @@ const StyledButton = styled(Button)`
   margin-top: 15px;
 
   &:hover {
-    background-color: #5a3617;
+    background-color: #585555ff;
   }
 `;
 
@@ -51,6 +51,7 @@ const SmallText = styled.p`
   font-size: 14px;
   margin-top: 16px;
   color: #333;
+  text-align: center;
 `;
 
 const LinkButton = styled.button`
