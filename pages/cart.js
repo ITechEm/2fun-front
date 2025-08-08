@@ -1,4 +1,4 @@
-import Header from "@/components/Header";
+import Layout from "./layout2";
 import styled from "styled-components";
 import Center from "@/components/Center";
 import Button from "@/components/Button";
@@ -254,7 +254,7 @@ export default function CartPage() {
   if (isSuccess) {
     return (
       <>
-        <Header />
+        <Layout>
         <Center>
           <ColumnsWrapper>
             <Box>
@@ -263,13 +263,14 @@ export default function CartPage() {
             </Box>
           </ColumnsWrapper>
         </Center>
+        </Layout>
       </>
     );
   }
 
   return (
     <>
-      <Header />
+      <Layout>
       <Center>
         <ColumnsWrapper>
           <RevealWrapper delay={0}>
@@ -378,6 +379,7 @@ export default function CartPage() {
           </PopupBox>
         </Overlay>
       )}
+      </Layout>
     </>
   );
 }

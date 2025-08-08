@@ -1,5 +1,6 @@
 'use client';
-import Header from "@/components/Header";
+
+import Layout from "./layout2";
 import Center from "@/components/Center";
 import { signIn, useSession } from "next-auth/react";
 import Button from "@/components/Button";
@@ -17,6 +18,7 @@ const ColsWrapper = styled.div`
   background: white;
   padding: 40px 30px;
   border-radius: 16px;
+  
 `;
 
 const Title = styled.h2`
@@ -31,6 +33,7 @@ const StyledInput = styled(Input)`
   border-radius: 12px;
   padding: 12px;
   font-size: 16px;
+  
 `;
 
 const StyledButton = styled(Button)`
@@ -140,7 +143,7 @@ export default function LoginPage() {
 
   return (
     <>
-      <Header />
+      <Layout>
       <Center>
         <ColsWrapper>
           <form onSubmit={handleLogin} style={{ width: '100%' }}>
@@ -172,7 +175,7 @@ export default function LoginPage() {
           </form>
         </ColsWrapper>
       </Center>
-
+</Layout>
       {formError && <ErrorPopup>{formError}</ErrorPopup>}
     </>
   );

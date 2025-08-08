@@ -1,4 +1,4 @@
-import Header from "@/components/Header";
+import Layout from "./layout2";
 import Center from "@/components/Center";
 import Button from "@/components/Button";
 import styled, { keyframes } from "styled-components";
@@ -119,7 +119,7 @@ export default function RegisterPage() {
 
   return (
     <>
-      <Header />
+      <Layout>
       <Center>
         <ColsWrapper>
           <form onSubmit={handleRegister} style={{ width: '100%' }}>
@@ -160,7 +160,7 @@ export default function RegisterPage() {
           </form>
         </ColsWrapper>
       </Center>
-
+</Layout>
       {formError && <ErrorPopup>{formError}</ErrorPopup>}
     </>
   );
