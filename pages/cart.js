@@ -2,13 +2,13 @@ import Header from "@/components/Header";
 import styled from "styled-components";
 import Center from "@/components/Center";
 import Button from "@/components/Button";
-import {useContext, useEffect, useState} from "react";
-import {CartContext} from "@/components/CartContext";
+import { useContext, useEffect, useState } from "react";
+import { CartContext } from "@/components/CartContext";
 import axios from "axios";
 import Table from "@/components/Table";
 import Input from "@/components/Input";
-import {RevealWrapper} from "next-reveal";
-import {useSession} from "next-auth/react";
+import { RevealWrapper } from "next-reveal";
+import { useSession } from "next-auth/react";
 import { useRouter } from 'next/router';  // <-- Added this import
 
 const ColumnsWrapper = styled.div`
@@ -84,6 +84,7 @@ const CityHolder = styled.div`
   display:flex;
   gap: 5px;
 `;
+
 const Overlay = styled.div`
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -119,21 +120,22 @@ const CloseBtn = styled.button`
 `;
 
 export default function CartPage() {
-  const {cartProducts,addProduct,removeProduct,clearCart} = useContext(CartContext);
-  const {data:session} = useSession();
+  const { cartProducts, addProduct, removeProduct, clearCart } = useContext(CartContext);
+  const { data: session } = useSession();
   const router = useRouter();  // <-- Initialize router
 
-  const [products,setProducts] = useState([]);
-  const [name,setName] = useState('');
-  const [email,setEmail] = useState('');
-  const [city,setCity] = useState('');
-  const [postalCode,setPostalCode] = useState('');
-  const [phone,setphone] = useState('');
-  const [streetAddress,setStreetAddress] = useState('');
-  const [country,setCountry] = useState('');
-  const [isSuccess,setIsSuccess] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [city, setCity] = useState('');
+  const [postalCode, setPostalCode] = useState('');
+  const [phone, setphone] = useState('');
+  const [streetAddress, setStreetAddress] = useState('');
+  const [country, setCountry] = useState('');
+  const [isSuccess, setIsSuccess] = useState(false);
   const [shippingFee, setShippingFee] = useState(null);
   const [popupMessage, setPopupMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(""); // <-- Add error message state
 
   function closePopup() {
     setPopupMessage(null);
@@ -142,10 +144,10 @@ export default function CartPage() {
   function goToProfile() {
     router.push('/profile');  // Redirect to profile page
   }
-  
+
   useEffect(() => {
     if (cartProducts.length > 0) {
-      axios.post('/api/cart', {ids:cartProducts})
+      axios.post('/api/cart', { ids: cartProducts })
         .then(response => {
           setProducts(response.data);
         })
@@ -185,10 +187,17 @@ export default function CartPage() {
   function moreOfThisProduct(id) {
     addProduct(id);
   }
+  
   function lessOfThisProduct(id) {
     removeProduct(id);
   }
+
   async function goToPayment() {
+    if (cartProducts.length === 0) {
+      setErrorMessage("Your cart is empty. Please add items before proceeding.");
+      return;
+    }
+
     if (!name || !name.trim()) {
       setPopupMessage('The Name is required!\nPlease update your Profile');
       return;
@@ -198,9 +207,9 @@ export default function CartPage() {
       return;
     }
     if (!phone || !(typeof phone === 'string' ? phone.trim() : String(phone).trim())) {
-  setPopupMessage('The Phone Number is required!\nPlease update your Profile');
-  return;
-}
+      setPopupMessage('The Phone Number is required!\nPlease update your Profile');
+      return;
+    }
     if (!streetAddress || !streetAddress.trim()) {
       setPopupMessage('The Street Address is required!\nPlease update your Profile');
       return;
@@ -219,13 +228,22 @@ export default function CartPage() {
     }
 
     const response = await axios.post('/api/checkout', {
-      name, email, city, phone, postalCode, streetAddress, country,
-      cartProducts,
-    });
-    if (response.data.url) {
-      window.location = response.data.url;
-    }
+    name,
+    email,
+    city,
+    phone,
+    postalCode,
+    streetAddress,
+    country,
+    cartProducts,
+  });
+
+  if (response.data.url) {
+    window.location = response.data.url;
+  } else {
+    setPopupMessage('There was an issue with the payment process.');
   }
+}
 
   let productsTotal = 0;
   for (const productId of cartProducts) {
@@ -263,108 +281,101 @@ export default function CartPage() {
               {products?.length > 0 && (
                 <Table>
                   <thead>
-                  <tr>
-                    <th>Product</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
-                  </tr>
+                    <tr>
+                      <th>Product</th>
+                      <th>Quantity</th>
+                      <th>Price</th>
+                    </tr>
                   </thead>
                   <tbody>
-                  {products.map(product => (
-                    <tr key={product._id}>
-                      <ProductInfoCell>
-                        <ProductImageBox>
-                          <img src={product.images[0]} alt=""/>
-                        </ProductImageBox>
-                        {product.title}
-                      </ProductInfoCell>
-                      <td>
-                        <Button
-                          onClick={() => lessOfThisProduct(product._id)}>-</Button>
-                        <QuantityLabel>
-                          {cartProducts.filter(id => id === product._id).length}
-                        </QuantityLabel>
-                        <Button
-                          onClick={() => moreOfThisProduct(product._id)}>+</Button>
-                      </td>
-                      <td>
-                        ${cartProducts.filter(id => id === product._id).length * product.price}
-                      </td>
+                    {products.map(product => (
+                      <tr key={product._id}>
+                        <ProductInfoCell>
+                          <ProductImageBox>
+                            <img src={product.images[0]} alt="" />
+                          </ProductImageBox>
+                          {product.title}
+                        </ProductInfoCell>
+                        <td>
+                          <Button
+                            onClick={() => lessOfThisProduct(product._id)}>-</Button>
+                          <QuantityLabel>
+                            {cartProducts.filter(id => id === product._id).length}
+                          </QuantityLabel>
+                          <Button
+                            onClick={() => moreOfThisProduct(product._id)}>+</Button>
+                        </td>
+                        <td>
+                          ${cartProducts.filter(id => id === product._id).length * product.price}
+                        </td>
+                      </tr>
+                    ))}
+                    <tr className="subtotal">
+                      <td colSpan={2}>Products</td>
+                      <td>${productsTotal}</td>
                     </tr>
-                  ))}
-                  <tr className="subtotal">
-                    <td colSpan={2}>Products</td>
-                    <td>${productsTotal}</td>
-                  </tr>
-                  <tr className="subtotal">
-                    <td colSpan={2}>Shipping</td>
-                    <td>${shippingFee}</td>
-                  </tr>
-                  <tr className="subtotal total">
-                    <td colSpan={2}>Total</td>
-                    <td>${productsTotal + parseInt(shippingFee || 0)}</td>
-                  </tr>
+                    <tr className="subtotal">
+                      <td colSpan={2}>Shipping</td>
+                      <td>${shippingFee}</td>
+                    </tr>
+                    <tr className="subtotal total">
+                      <td colSpan={2}>Total</td>
+                      <td>${productsTotal + parseInt(shippingFee || 0)}</td>
+                    </tr>
                   </tbody>
                 </Table>
               )}
             </Box>
           </RevealWrapper>
+
           {!!cartProducts?.length && (
             <RevealWrapper delay={100}>
               <Box>
                 <h2>Order information</h2>
-                <Input 
-                       value={name}
-                       disabled />
-                <Input 
-                       value={email}
-                       disabled/>
+                <Input
+                  value={name}
+                  disabled />
+                <Input
+                  value={email}
+                  disabled />
 
-                <Input 
-                       value={phone}
-                       disabled/>
-                <Input 
-                       value={streetAddress}
-                       disabled/>
+                <Input
+                  value={phone}
+                  disabled />
+                <Input
+                  value={streetAddress}
+                  disabled />
                 <CityHolder>
-                  <Input 
-                         value={city}
-                         disabled/>
-                  <Input 
-                         value={postalCode}
-                         disabled/>
+                  <Input
+                    value={city}
+                    disabled />
+                  <Input
+                    value={postalCode}
+                    disabled />
                 </CityHolder>
-                <Input 
-                       value={country}
-                       disabled/>
+                <Input
+                  value={country}
+                  disabled />
                 <Button black block
                         onClick={goToPayment}>
                   Continue to payment
                 </Button>
+                {errorMessage && <div style={{ color: 'red', marginTop: '10px' }}>{errorMessage}</div>} {/* Display error */}
               </Box>
             </RevealWrapper>
           )}
         </ColumnsWrapper>
       </Center>
+
       {popupMessage && (
         <Overlay>
           <PopupBox>
-  <pre style={{ whiteSpace: 'pre-wrap', margin: 0, justifyContent: 'center',  gap: '10px', marginTop: '15px'}}>{popupMessage}</pre>
-  <CloseBtn onClick={closePopup}>Close</CloseBtn>
-  <CloseBtn onClick={goToProfile} style={{ backgroundColor: '#3498db', marginLeft: '15px' }}>
-    Go to Profile
-  </CloseBtn>
-</PopupBox>
-
-          {/* <PopupBox>
-            <h3>{popupMessage}</h3>
-            <div style={{ whiteSpace: 'pre-wrap', margin: 0 , justifyContent: 'center', gap: '10px', marginTop: '15px' }}>
-              <CloseBtn onClick={closePopup}>Close</CloseBtn>
-              <CloseBtn onClick={goToProfile} style={{ backgroundColor: '#3498db' }}>
-                Go to Profile
-              </CloseBtn>
-            </div>
-          </PopupBox> */}
+            <pre style={{ whiteSpace: 'pre-wrap', margin: 0, justifyContent: 'center', gap: '10px', marginTop: '15px' }}>{popupMessage}</pre>
+            <CloseBtn onClick={closePopup}>Close</CloseBtn>
+            <CloseBtn onClick={goToProfile} style={{ backgroundColor: '#3498db', marginLeft: '15px' }}>
+              Go to Profile
+            </CloseBtn>
+          </PopupBox>
         </Overlay>
       )}
     </>

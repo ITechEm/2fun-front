@@ -14,8 +14,15 @@ const StyledHeader = styled.header`
   top: 0;
   z-index: 10;
   color: black;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Optional, adjust for mobile if needed */
   min-height: 60px;
+  padding: 1px ;
+  
+  @media (max-width: 768px) {
+    min-height: 50px;  /* Adjust height on smaller screens */
+    padding: 10px 15px;  /* Reduce padding on smaller screens */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);  /* Lighter shadow for mobile */
+  }
 `;
 
 const WideCenter = styled.div`
@@ -29,14 +36,13 @@ const Wrapper = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: px 0;
+  padding: 0 20px; /* Add proper padding values */
   max-width: 100%;
   width: 100%;
 
   @media (max-width: 768px) {
-    padding: 10px 0;
-    flex-direction: column;
-    gap: 20px;
+    
+    padding: 10px 20px; /* Adjust padding for mobile */
   }
 `;
 
