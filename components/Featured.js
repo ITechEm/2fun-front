@@ -89,7 +89,7 @@ const PurpleButton = styled(ButtonLink)`
 `;
 
 const PurpleFlyingButton = styled(FlyingButton)`
-  background-color: #eae9e5 !important;
+  background-color: #f9f9f9  !important;
   border-radius: 30px !important;
   padding: 14px 28px !important;
   font-weight: 700 !important;

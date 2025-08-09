@@ -1,4 +1,4 @@
-import Header from "@/components/Header";
+import Layout from "./layout";
 import styled from "styled-components";
 import Center from "@/components/Center";
 import {mongooseConnect} from "@/lib/mongoose";
@@ -12,11 +12,12 @@ import {WishedProduct} from "@/models/WishedProduct";
 export default function ProductsPage({products,wishedProducts}) {
   return (
     <>
-      <Header />
+      <Layout>
       <Center>
         <Title>All products</Title>
         <ProductsGrid products={products} wishedProducts={wishedProducts} />
       </Center>
+      </Layout>
     </>
   );
 }

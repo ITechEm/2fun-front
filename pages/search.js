@@ -1,4 +1,4 @@
-import Header from "@/components/Header";
+import Layout from "./layout";
 import Center from "@/components/Center";
 import Input from "@/components/Input";
 import styled from "styled-components";
@@ -46,7 +46,7 @@ export default function SearchPage() {
   }
   return (
     <>
-      <Header />
+      <Layout>
       <Center>
         <InputWrapper>
           <SearchInput
@@ -65,6 +65,7 @@ export default function SearchPage() {
           <ProductsGrid products={products} />
         )}
       </Center>
+      </Layout>
     </>
   );
 }

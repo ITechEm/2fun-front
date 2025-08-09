@@ -307,21 +307,21 @@ export default function CartPage() {
                             onClick={() => moreOfThisProduct(product._id)}>+</Button>
                         </td>
                         <td>
-                          ${cartProducts.filter(id => id === product._id).length * product.price}
+                          €{cartProducts.filter(id => id === product._id).length * product.price}
                         </td>
                       </tr>
                     ))}
                     <tr className="subtotal">
                       <td colSpan={2}>Products</td>
-                      <td>${productsTotal}</td>
+                      <td>€{productsTotal}</td>
                     </tr>
                     <tr className="subtotal">
                       <td colSpan={2}>Shipping</td>
-                      <td>${shippingFee}</td>
+                      <td>€{shippingFee}</td>
                     </tr>
                     <tr className="subtotal total">
                       <td colSpan={2}>Total</td>
-                      <td>${productsTotal + parseInt(shippingFee || 0)}</td>
+                      <td>€{productsTotal + parseInt(shippingFee || 0)}</td>
                     </tr>
                   </tbody>
                 </Table>
