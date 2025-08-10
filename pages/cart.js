@@ -37,7 +37,7 @@ const ColumnsWrapper = styled.div`
 
 const Box = styled.div`
   background-color: #fff;
-  border-radius: 10px;
+  border-radius: 20px;
   padding: 30px;
 `;
 
@@ -295,7 +295,7 @@ export default function CartPage() {
             <Box>
               <h2>Cart</h2>
               {!cartProducts?.length ? (
-                <div>Your cart is empty</div>
+                <div>Looks like you have not added anything to your cart. <br></br>Go ahead and explore our menu’s  </div>
               ) : (
                 <Table>
                   <thead>

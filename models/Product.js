@@ -7,6 +7,8 @@ const ProductSchema = new Schema({
   images: [{type:String}],
   category: {type:mongoose.Types.ObjectId, ref:'Category'},
   properties: {type:Object},
+  quantity: Number,
+  inStock: { type: Boolean, default: true },
 }, {
   timestamps: true,
 });
