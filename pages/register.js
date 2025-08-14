@@ -33,6 +33,27 @@ const StyledInput = styled(Input)`
   margin-bottom: 15px;
 `;
 
+const InputWrapper = styled.div`
+  position: relative;
+  width: 100%;
+`;
+
+const PasswordInput = styled(StyledInput)`
+  padding-right: 40px;
+`;
+
+const ShowPasswordButton = styled.button`
+  position: absolute;
+  top: 40%;
+  right: 20px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  font-size: 16px;
+`;
+
 const StyledButton = styled(Button)`
   background-color: #1f1f1f;
   color: white;
@@ -90,16 +111,23 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [formError, setFormError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
-  async function handleRegister(e) {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    setFormError('');
 
-    if (!email || !password || !name) {
+    if (!name || !email || !password) {
       setFormError('Toate câmpurile sunt obligatorii.');
       return;
     }
+
+    if (password.length < 6 || password.length > 12) {
+      setFormError('Parola trebuie să fie între 6 și 12 caractere.');
+      return;
+    }
+
+    setFormError('');
 
     try {
       await axios.post('/api/register', { name, email, password });
@@ -107,9 +135,8 @@ export default function RegisterPage() {
     } catch (error) {
       setFormError(error.response?.data?.error || 'Error registering');
     }
-  }
+  };
 
-  // Auto-hide popup after 3 seconds
   useEffect(() => {
     if (formError) {
       const timer = setTimeout(() => setFormError(''), 3000);
@@ -120,47 +147,57 @@ export default function RegisterPage() {
   return (
     <>
       <Layout>
-      <Center>
-        <ColsWrapper>
-          <form onSubmit={handleRegister} style={{ width: '100%' }}>
-            <Title>Register</Title>
+        <Center>
+          <ColsWrapper>
+            <form onSubmit={handleRegister} style={{ width: '100%' }}>
+              <Title>Register</Title>
 
-            <StyledInput
-              type="text"
-              placeholder="Name"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              required
-            />
-            <StyledInput
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-            />
-            <StyledInput
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              minLength={6}
-              maxLength={12}
-            />
+              <StyledInput
+                type="text"
+                placeholder="Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+              <StyledInput
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
 
-            <StyledButton type="submit" block>Inregistreaza-te</StyledButton>
+             
+              <InputWrapper>
+                <PasswordInput
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
+                  maxLength={12}
+                />
+                <ShowPasswordButton
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                >
+                  {showPassword ? 'Hide' : 'Show'}
+                </ShowPasswordButton>
+              </InputWrapper>
 
-            <SmallText>
-              Ai deja cont?{" "}
-              <LinkButton onClick={() => router.push('/login')}>
-                Intră în cont
-              </LinkButton>
-            </SmallText>
-          </form>
-        </ColsWrapper>
-      </Center>
-</Layout>
+              <StyledButton type="submit" block>Inregistreaza-te</StyledButton>
+
+              <SmallText>
+                Ai deja cont?{' '}
+                <LinkButton onClick={() => router.push('/login')}>
+                  Intră în cont
+                </LinkButton>
+              </SmallText>
+            </form>
+          </ColsWrapper>
+        </Center>
+      </Layout>
       {formError && <ErrorPopup>{formError}</ErrorPopup>}
     </>
   );

@@ -36,6 +36,27 @@ const StyledInput = styled(Input)`
   
 `;
 
+const InputWrapper = styled.div`
+  position: relative;
+  width: 100%;
+`;
+
+const PasswordInput = styled(StyledInput)`
+  padding-right: 40px;
+`;
+
+const ShowPasswordButton = styled.button`
+  position: absolute;
+  top: 45%;
+  right: 20px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  font-size: 16px;
+`;
+
 const StyledButton = styled(Button)`
   background-color: #1f1f1f;
   color: white;
@@ -92,6 +113,7 @@ export default function LoginPage() {
   const { data: session } = useSession();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+   const [showPassword, setShowPassword] = useState(false);
   const [formError, setFormError] = useState('');
   const router = useRouter();
 
@@ -156,13 +178,23 @@ export default function LoginPage() {
               onChange={ev => setEmail(ev.target.value)}
               required
             />
-            <StyledInput
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={ev => setPassword(ev.target.value)}
-              required
-            />
+            <InputWrapper>
+                <PasswordInput
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
+                  maxLength={12}
+                />
+                <ShowPasswordButton
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                >
+                  {showPassword ? 'Hide' : 'Show'}
+                </ShowPasswordButton>
+              </InputWrapper>
 
             <StyledButton type="submit" block>Login</StyledButton>
 
