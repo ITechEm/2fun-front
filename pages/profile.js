@@ -14,12 +14,13 @@ import Tabs from '@/components/Tabs';
 import SingleOrder from '@/components/SingleOrder';
 import Center from '@/components/Center';
 import Header from '@/components/Header';
+import Layout from './layout';
 
 // ConfirmModal Component
 const ModalOverlay = styled.div`
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.5);
+  background: #00000080;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -205,7 +206,7 @@ export default function ProfilePage() {
 
   return (
     <>
-      <Header />
+      <Layout>
       <Center>
         <ColsWrapper>
           <div>
@@ -370,6 +371,7 @@ export default function ProfilePage() {
           </div>
         )}
       </Center>
+      </Layout>
     </>
   );
 }

@@ -1,4 +1,4 @@
-import Header from "@/components/Header";
+import Layout from "./layout";
 import Center from "@/components/Center";
 import { signOut, useSession } from "next-auth/react";
 import Button from "@/components/Button";
@@ -36,7 +36,7 @@ export default function AccountPage() {
 
   return (
     <>
-      <Header />
+      <Layout>
       <Center>
         <ColsWrapper>
           <RevealWrapper delay={100}>
@@ -52,6 +52,7 @@ export default function AccountPage() {
           </RevealWrapper>
         </ColsWrapper>
       </Center>
+      </Layout>
     </>
   );
 }
