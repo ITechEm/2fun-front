@@ -60,6 +60,12 @@ const ShippingAddressField = styled.div`
     pointer-events: none;
   }
 `;
+const StatusBadge = styled.span`
+  font-weight: bold;
+
+  padding: 5px 30px;
+ 
+`;
 
 const getStatusColor = (status) => {
   switch (status) {
@@ -119,7 +125,7 @@ const OrderDetailsPage = () => {
   }, [orderId]);
 
   if (error) return <p>{error}</p>;
-  if (!order || !shippingAddress) return <p>Order not available!</p>;
+  if (!order || !shippingAddress) return <p>Loading...</p>;
 
   const itemTotal = order.line_items.reduce((acc, item) => {
     return acc + item.quantity * (item.price_data.unit_amount / 100);
@@ -135,7 +141,7 @@ const OrderDetailsPage = () => {
           <OrderDetailContainer>
             <h2 style={{ marginBottom: "10px" }}>Order Details</h2>
             <p style={{ marginBottom: "10px" }}><strong>Status: </strong> 
-              <span style={{ color: getStatusColor(order.status) }}>{order.status}</span>
+              <StatusBadge style={{ color: getStatusColor(order.status) }}>{order.status}</StatusBadge>
             </p>
             <p><strong>Date:</strong> {new Date(order.createdAt).toLocaleString()}</p>
             <p><strong>Total items:</strong> {totalAmount.toFixed(2)} €</p>
