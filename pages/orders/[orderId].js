@@ -93,21 +93,20 @@ const OrderDetailsPage = () => {
   const [shippingAddress, setShippingAddress] = useState(null);
   const [error, setError] = useState(null);
 
-  // Ensure hooks are always called
-  useEffect(() => {
-    if (orderId) {
-      axios
-        .get(`/api/orders/${orderId}`)
-        .then((res) => {
-          console.log("Order Response:", res.data);
-          setOrder(res.data);
-        })
-        .catch((error) => {
-          console.error("Error fetching order:", error);
-          setError("Failed to fetch order details");
-        });
-    }
-  }, [orderId]);
+ useEffect(() => {
+  if (orderId) {
+    axios
+      .get(`/api/orders/${orderId}`)
+      .then((res) => {
+        console.log("Order Response:", res.data); // Ensure that orderNumber is in the response
+        setOrder(res.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching order:", error);
+        setError("Failed to fetch order details");
+      });
+  }
+}, [orderId]);
 
   useEffect(() => {
     if (orderId) {
@@ -124,9 +123,8 @@ const OrderDetailsPage = () => {
     }
   }, [orderId]);
 
-  // Handle error state before rendering
   if (error) return <p>{error}</p>;
-  if (!orderId) return <p>Order not available!</p>; // Early return if no orderId
+  if (!orderId) return <p>Order not available!</p>;
   if (!order || !shippingAddress) return <p>Loading...</p>;
 
   const itemTotal = order.line_items.reduce((acc, item) => {
@@ -142,6 +140,9 @@ const OrderDetailsPage = () => {
         <Container>
           <OrderDetailContainer>
             <h2 style={{ marginBottom: "10px" }}>Order Details</h2>
+            <p style={{ marginBottom: "10px" }}>
+              <strong>Order Number: </strong>{order.orderNumber}
+            </p>
             <p style={{ marginBottom: "10px" }}>
               <strong>Status: </strong>
               <StatusBadge style={{ color: getStatusColor(order.status) }}>
