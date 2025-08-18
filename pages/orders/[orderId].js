@@ -1,99 +1,11 @@
-import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import axios from "axios";
-import styled from "styled-components";
-import Layout from "../layout";
-
-const OrderDetailContainer = styled.div`
-  padding: 20px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  width: 100%;
-`;
-
-const Container = styled.div`
-  display: grid;
-  max-width: 900px;
-  justify-content: center;
-  gap: 20px;
-  grid-template-columns: 1fr 1fr;
-
-  @media screen and (max-width: 768px) {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-`;
-
-const ColsWrapper = styled.div`
-  display: grid;
-  padding: 40px;
-  justify-content: center;
-  max-width: auto;
-`;
-
-const ShippingAddressContainer = styled.div`
-  padding: 20px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  font-size: 0.9rem;
-`;
-
-const ShippingAddressField = styled.div`
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 10px;
-
-  label {
-    font-weight: bold;
-    margin-bottom: 5px;
-  }
-
-  input {
-    padding: 8px;
-    font-size: 0.9rem;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background-color: #f0f0f0;
-    cursor: not-allowed;
-    pointer-events: none;
-  }
-`;
-const StatusBadge = styled.span`
-  font-weight: bold;
-
-  padding: 5px 30px;
- 
-`;
-
-const getStatusColor = (status) => {
-  switch (status) {
-    case "Cancelled":
-      return "#f87171"; 
-    case "Pending":
-      return "#fbbf24"; 
-    case "In Progress":
-      return "#3b82f6"; 
-    case "Ready for Delivery":
-      return "#34d399";
-    case "In Delivery":
-      return "#10b981"; 
-    case "Delivered":
-      return "#16a34a"; 
-    default:
-      return "#d1d5db"; 
-  }
-};
-
 const OrderDetailsPage = () => {
   const router = useRouter();
   const { orderId } = router.query;
   const [order, setOrder] = useState(null);
   const [shippingAddress, setShippingAddress] = useState(null);
-  const [error, setError] = useState(null); 
+  const [error, setError] = useState(null);
 
-  if (!orderId) return <p>Order not available!</p>;
+  // Ensure hooks are always called
   useEffect(() => {
     if (orderId) {
       axios
@@ -124,7 +36,9 @@ const OrderDetailsPage = () => {
     }
   }, [orderId]);
 
+  // Handle error state before rendering
   if (error) return <p>{error}</p>;
+  if (!orderId) return <p>Order not available!</p>; // Early return if no orderId
   if (!order || !shippingAddress) return <p>Loading...</p>;
 
   const itemTotal = order.line_items.reduce((acc, item) => {
@@ -140,26 +54,31 @@ const OrderDetailsPage = () => {
         <Container>
           <OrderDetailContainer>
             <h2 style={{ marginBottom: "10px" }}>Order Details</h2>
-            <p style={{ marginBottom: "10px" }}><strong>Status: </strong> 
-              <StatusBadge style={{ color: getStatusColor(order.status) }}>{order.status}</StatusBadge>
+            <p style={{ marginBottom: "10px" }}>
+              <strong>Status: </strong>
+              <StatusBadge style={{ color: getStatusColor(order.status) }}>
+                {order.status}
+              </StatusBadge>
             </p>
             <p><strong>Date:</strong> {new Date(order.createdAt).toLocaleString()}</p>
             <p><strong>Total items:</strong> {totalAmount.toFixed(2)} €</p>
             <p style={{ marginBottom: "20px" }}><strong>Shipping:</strong> 6,99 €</p>
             <h3>Items:</h3>
             <div>
-              {order.line_items.map((item) => {
-                return (
-                  <div key={item.id} style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
-                    <div>
-                      <p>{item.quantity} x {item.price_data.product_data.name} - {item.price_data.unit_amount / 100} €</p>
-                    </div>
-                  </div>
-                );
-              })}
+              {order.line_items.map((item) => (
+                <div
+                  key={item.id}
+                  style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}
+                >
+                  <p>
+                    {item.quantity} x {item.price_data.product_data.name} -{" "}
+                    {item.price_data.unit_amount / 100} €
+                  </p>
+                </div>
+              ))}
             </div>
           </OrderDetailContainer>
-          
+
           <ShippingAddressContainer>
             <h2 style={{ marginBottom: "10px" }}>Shipping Address:</h2>
             {shippingAddress ? (
@@ -204,3 +123,4 @@ const OrderDetailsPage = () => {
 };
 
 export default OrderDetailsPage;
+
