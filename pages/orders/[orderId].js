@@ -61,29 +61,21 @@ const ShippingAddressField = styled.div`
     pointer-events: none;
   }
 `;
+
 const StatusBadge = styled.span`
   font-weight: bold;
-
   padding: 5px 30px;
- 
 `;
 
 const getStatusColor = (status) => {
   switch (status) {
-    case "Cancelled":
-      return "#f87171"; 
-    case "Pending":
-      return "#fbbf24"; 
-    case "In Progress":
-      return "#3b82f6"; 
-    case "Ready for Delivery":
-      return "#34d399";
-    case "In Delivery":
-      return "#10b981"; 
-    case "Delivered":
-      return "#16a34a"; 
-    default:
-      return "#d1d5db"; 
+    case "Cancelled": return "#f87171";
+    case "Pending": return "#fbbf24";
+    case "In Progress": return "#3b82f6";
+    case "Ready for Delivery": return "#34d399";
+    case "In Delivery": return "#10b981";
+    case "Delivered": return "#16a34a";
+    default: return "#d1d5db";
   }
 };
 
@@ -94,31 +86,25 @@ const OrderDetailsPage = () => {
   const [shippingAddress, setShippingAddress] = useState(null);
   const [error, setError] = useState(null);
 
- useEffect(() => {
-  if (orderId) {
-    axios
-      .get(`/api/orders/${orderId}`)
-      .then((res) => {
-        console.log("Order Response:", res.data);
-        setOrder(res.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching order:", error);
-        setError("Failed to fetch order details");
-      });
-  }
-}, [orderId]);
+  useEffect(() => {
+    if (orderId) {
+      axios
+        .get(`/api/orders/${orderId}`)
+        .then((res) => setOrder(res.data))
+        .catch((err) => {
+          console.error("Error fetching order:", err);
+          setError("Failed to fetch order details");
+        });
+    }
+  }, [orderId]);
 
   useEffect(() => {
     if (orderId) {
       axios
         .get(`/api/address`)
-        .then((res) => {
-          console.log("Shipping Address:", res.data);
-          setShippingAddress(res.data);
-        })
-        .catch((error) => {
-          console.error("Error fetching shipping address:", error);
+        .then((res) => setShippingAddress(res.data))
+        .catch((err) => {
+          console.error("Error fetching shipping address:", err);
           setError("Failed to fetch shipping address");
         });
     }
@@ -139,68 +125,71 @@ const OrderDetailsPage = () => {
     <Layout>
       <ColsWrapper>
         <Container>
+          {/* Order Details */}
           <OrderDetailContainer>
             <h2 style={{ marginBottom: "10px" }}>Order Details</h2>
+
             <p style={{ marginBottom: "10px" }}>
-              <strong>Order Number: </strong>{order.orderNumber}
+              <strong>Order Number:</strong> {order.orderNumber}
             </p>
-            <p style={{ marginBottom: "10px" }}>
-              <strong>Status: </strong>
+
+            <p>
+              <strong>Status:</strong>{" "}
               <StatusBadge style={{ color: getStatusColor(order.status) }}>
                 {order.status}
               </StatusBadge>
             </p>
+
+            <p style={{ marginTop: "10px" }}>
+              <strong>Tracking Info:</strong>
+            </p>
+            <p style={{ minHeight: "40px", whiteSpace: "pre-wrap", color: "#333" }}>
+              {order.trackOrder
+                ? order.trackOrder
+                : "Tracking info will be available after your order is shipped."}
+            </p>
+
             <p><strong>Date:</strong> {new Date(order.createdAt).toLocaleString('RO')}</p>
-            <p><strong>Total items:</strong> {totalAmount.toFixed(2)} €</p>
-            <p style={{ marginBottom: "20px" }}><strong>Shipping:</strong> 6,99 €</p>
+            <p><strong>Total Items:</strong> {totalAmount.toFixed(2)} €</p>
+            <p style={{ marginBottom: "20px" }}>
+              <strong>Shipping:</strong> {shippingCost.toFixed(2)} €
+            </p>
+
             <h3>Items:</h3>
             <div>
-              {order.line_items.map((item) => (
+              {order.line_items.map((item, index) => (
                 <div
-                  key={item.id}
+                  key={index}
                   style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}
                 >
                   <p>
                     {item.quantity} x {item.price_data.product_data.name} -{" "}
-                    {item.price_data.unit_amount / 100} €
+                    {(item.price_data.unit_amount / 100).toFixed(2)} €
                   </p>
                 </div>
               ))}
             </div>
           </OrderDetailContainer>
 
+          {/* Shipping Address */}
           <ShippingAddressContainer>
             <h2 style={{ marginBottom: "10px" }}>Shipping Address:</h2>
             {shippingAddress ? (
               <>
-                <ShippingAddressField>
-                  <label>Name</label>
-                  <input type="text" value={shippingAddress.name} readOnly />
-                </ShippingAddressField>
-                <ShippingAddressField>
-                  <label>Email</label>
-                  <input type="text" value={shippingAddress.email} readOnly />
-                </ShippingAddressField>
-                <ShippingAddressField>
-                  <label>Phone</label>
-                  <input type="text" value={shippingAddress.phone} readOnly />
-                </ShippingAddressField>
-                <ShippingAddressField>
-                  <label>Street Address</label>
-                  <input type="text" value={shippingAddress.streetAddress} readOnly />
-                </ShippingAddressField>
-                <ShippingAddressField>
-                  <label>City</label>
-                  <input type="text" value={shippingAddress.city} readOnly />
-                </ShippingAddressField>
-                <ShippingAddressField>
-                  <label>Postal Code</label>
-                  <input type="text" value={shippingAddress.postalCode} readOnly />
-                </ShippingAddressField>
-                <ShippingAddressField>
-                  <label>Country</label>
-                  <input type="text" value={shippingAddress.country} readOnly />
-                </ShippingAddressField>
+                {[
+                  { label: "Name", value: shippingAddress.name },
+                  { label: "Email", value: shippingAddress.email },
+                  { label: "Phone", value: shippingAddress.phone },
+                  { label: "Street Address", value: shippingAddress.streetAddress },
+                  { label: "City", value: shippingAddress.city },
+                  { label: "Postal Code", value: shippingAddress.postalCode },
+                  { label: "Country", value: shippingAddress.country },
+                ].map((field, index) => (
+                  <ShippingAddressField key={index}>
+                    <label>{field.label}</label>
+                    <input type="text" value={field.value} readOnly />
+                  </ShippingAddressField>
+                ))}
               </>
             ) : (
               <p>Shipping address not available.</p>
