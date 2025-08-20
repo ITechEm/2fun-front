@@ -46,13 +46,6 @@ const OrderDetailsWrapper = styled.div`
   flex-direction: column;
 `;
 
-const ButtonWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 150px;
-`;
-
 const ShowOrderButton = styled.button`
   padding: 8px 16px;
   background-color: #000;
@@ -95,9 +88,9 @@ export default function SingleOrder({ line_items, createdAt, _id, orderNumber, .
       </div>
 
       <Link href={`/orders/${_id}`}>
-        <ButtonWrapper>
+       
           <ShowOrderButton>Show Order</ShowOrderButton>
-        </ButtonWrapper>
+       
       </Link>
     </StyledOrder>
   );
