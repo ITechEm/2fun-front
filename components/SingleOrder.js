@@ -27,7 +27,7 @@ const StyledOrder = styled.div`
   border-bottom: 1px solid #ddd;
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   gap: 20px;
 `;
 
@@ -44,6 +44,13 @@ const StatusBadge = styled.span`
 const OrderDetailsWrapper = styled.div`
   display: flex;
   flex-direction: column;
+`;
+
+const ButtonWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 150px;
 `;
 
 const ShowOrderButton = styled.button`
@@ -67,22 +74,30 @@ function formatStatus(status) {
     .map(s => s.charAt(0).toUpperCase() + s.slice(1))
     .join(' ');
 }
-export default function SingleOrder({ line_items, createdAt, _id, ...rest }) {
+
+export default function SingleOrder({ line_items, createdAt, _id, orderNumber, ...rest }) {
   const statusColor = getStatusColor(rest.status);
 
   return (
     <StyledOrder>
       <div>
         <OrderDetailsWrapper>
+          <div style={{ marginBottom: "8px", fontWeight: "bold" }}>
+            {orderNumber || _id}
+          </div>
+
           <StatusBadge bgColor={statusColor}>
-  {formatStatus(rest.status)}
-</StatusBadge>
+            {formatStatus(rest.status)}
+          </StatusBadge>
+
           <time>{new Date(createdAt).toLocaleString('RO')}</time>
         </OrderDetailsWrapper>
       </div>
 
       <Link href={`/orders/${_id}`}>
-        <ShowOrderButton>Show Order</ShowOrderButton>
+        <ButtonWrapper>
+          <ShowOrderButton>Show Order</ShowOrderButton>
+        </ButtonWrapper>
       </Link>
     </StyledOrder>
   );

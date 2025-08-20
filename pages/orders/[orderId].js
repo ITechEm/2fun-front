@@ -64,7 +64,7 @@ const ShippingAddressField = styled.div`
 
 const StatusBadge = styled.span`
   font-weight: bold;
-  padding: 5px 30px;
+  padding: 5px ;
 `;
 
 const getStatusColor = (status) => {
@@ -118,43 +118,30 @@ const OrderDetailsPage = () => {
     return acc + item.quantity * (item.price_data.unit_amount / 100);
   }, 0);
 
-  const shippingCost = order.shippingAmount ? order.shippingAmount / 100 : 0;
+  const shippingCost = order.shippingAmount ? order.shippingAmount / 100 : 6.99;
   const totalAmount = itemTotal + shippingCost;
 
   return (
     <Layout>
       <ColsWrapper>
         <Container>
-          {/* Order Details */}
           <OrderDetailContainer>
-            <h2 style={{ marginBottom: "10px" }}>Order Details</h2>
-
-            <p style={{ marginBottom: "10px" }}>
-              <strong>Order Number:</strong> {order.orderNumber}
-            </p>
-
-            <p>
-              <strong>Status:</strong>{" "}
+            <h2 style={{ marginBottom: "10px" }}>Order Details</h2>          
+            <p><strong>Order Number:</strong> {order.orderNumber}</p>
+            <p style={{ marginBottom: "10px" }}><strong>Date:</strong> {new Date(order.createdAt).toLocaleString('RO')}</p>
+            <p><strong>Status:</strong>{" "}
               <StatusBadge style={{ color: getStatusColor(order.status) }}>
                 {order.status}
               </StatusBadge>
             </p>
-
-            <p style={{ marginTop: "10px" }}>
-              <strong>Tracking Info:</strong>
-            </p>
-            <p style={{ minHeight: "40px", whiteSpace: "pre-wrap", color: "#333" }}>
+            <p><strong>Tracking Info:</strong>            </p>
+            <p style={{ minHeight: "40px", whiteSpace: "pre-wrap", color: "#333", marginBottom: "10px"}}>
               {order.trackOrder
-                ? order.trackOrder
-                : "Tracking info will be available after your order is shipped."}
+                ? (order.trackOrder)
+                : (<>Tracking info will be available <br />after your order is shipped.</>)}
             </p>
-
-            <p><strong>Date:</strong> {new Date(order.createdAt).toLocaleString('RO')}</p>
-            <p><strong>Total Items:</strong> {totalAmount.toFixed(2)} €</p>
-            <p style={{ marginBottom: "20px" }}>
-              <strong>Shipping:</strong> {shippingCost.toFixed(2)} €
-            </p>
-
+            <p><strong>Total Payment:</strong> {totalAmount.toFixed(2)} €</p>
+            <p><strong>Shipping:</strong> {shippingCost.toFixed(2)} €</p>
             <h3>Items:</h3>
             <div>
               {order.line_items.map((item, index) => (
@@ -171,7 +158,6 @@ const OrderDetailsPage = () => {
             </div>
           </OrderDetailContainer>
 
-          {/* Shipping Address */}
           <ShippingAddressContainer>
             <h2 style={{ marginBottom: "10px" }}>Shipping Address:</h2>
             {shippingAddress ? (
