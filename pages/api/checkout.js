@@ -6,6 +6,11 @@ import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { Setting } from "@/models/Setting";
 const stripe = require('stripe')(process.env.STRIPE_SK);
 
+function generateOrderNumber() {
+  const randomNum = Math.floor(10000 + Math.random() * 90000);
+  return `ORDER-${randomNum}`;
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -28,9 +33,9 @@ export default async function handler(req, res) {
         line_items.push({
           quantity,
           price_data: {
-            currency: 'USD',
+            currency: 'EUR',
             product_data: { name: productInfo.title },
-            unit_amount: Math.round(productInfo.price * 100), // price in cents
+            unit_amount: Math.round(productInfo.price * 100),
           },
         });
       }
@@ -42,18 +47,21 @@ export default async function handler(req, res) {
 
     const session = await getServerSession(req, res, authOptions);
 
-    const orderDoc = await Order.create({
-      line_items,
-      name,
-      email,
-      phone,
-      streetAddress,
-      city,
-      postalCode,
-      country,
-      paid: false,
-      userEmail: session?.user?.email,
-    });
+    const orderNumber = generateOrderNumber();
+
+const orderDoc = await Order.create({
+  orderNumber,
+  line_items,
+  name,
+  email,
+  phone,
+  streetAddress,
+  city,
+  postalCode,
+  country,
+  paid: false,
+  userEmail: session?.user?.email,
+});
 
     const shippingFeeSetting = await Setting.findOne({ name: 'shippingFee' });
     const shippingFeeCents = Number(shippingFeeSetting?.value ?? 0) * 100;
@@ -71,13 +79,16 @@ export default async function handler(req, res) {
           shipping_rate_data: {
             display_name: 'shipping fee',
             type: 'fixed_amount',
-            fixed_amount: { amount: shippingFeeCents, currency: 'USD' },
+            fixed_amount: { amount: shippingFeeCents, currency: 'EUR' },
           },
         },
       ],
     });
 
-    res.json({ url: stripeSession.url });
+    res.json({ 
+  url: stripeSession.url,
+  orderNumber: orderDoc.orderNumber,
+});
   } catch (error) {
     console.error('Checkout error:', error);
     res.status(500).json({ error: error.message || 'Internal Server Error' });

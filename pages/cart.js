@@ -142,6 +142,7 @@ export default function CartPage() {
   const [shippingFee, setShippingFee] = useState(null);
   const [popupMessage, setPopupMessage] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [orderNumber, setOrderNumber] = useState(null);
 
   function closePopup() {
     setPopupMessage(null);
@@ -167,19 +168,19 @@ export default function CartPage() {
     }
   }, [cartProducts]);
 
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-    if (window?.location.href.includes('success')) {
-      setIsSuccess(true);
-      clearCart();
-    }
-    axios.get('/api/settings?name=shippingFee').then(res => {
-      setShippingFee(res.data.value);
-    });
-  }, []);
+useEffect(() => {
+  if (typeof window === 'undefined') return;
 
+  if (window.location.href.includes('success')) {
+    const savedOrderNumber = localStorage.getItem('orderNumber');
+    if (savedOrderNumber) {
+      setOrderNumber(savedOrderNumber);
+      localStorage.removeItem('orderNumber');
+    }
+    setIsSuccess(true);
+    clearCart();
+  }
+}, []);
   useEffect(() => {
     if (!session) {
       return;
@@ -253,8 +254,11 @@ export default function CartPage() {
     });
 
     if (response.data.url) {
-      window.location = response.data.url;
-    } else {
+  if (response.data.orderNumber) {
+    localStorage.setItem('orderNumber', response.data.orderNumber);
+  }
+  window.location = response.data.url;
+} else {
       setPopupMessage('There was an issue with the payment process.');
     }
   } catch (error) {
@@ -273,19 +277,22 @@ export default function CartPage() {
   }
 
   if (isSuccess) {
-    return (
-      <Layout>
-        <Center>
-          <ColumnsWrapper>
-            <Box>
-              <h1>Thanks for your order!</h1>
-              <p>We will email you when your order will be sent.</p>
-            </Box>
-          </ColumnsWrapper>
-        </Center>
-      </Layout>
-    );
-  }
+  return (
+    <Layout>
+      <Center>
+        <ColumnsWrapper>
+          <Box>
+            <h1>Thanks for your order!</h1>
+            <p>We will email you when your order is shipped.</p>
+            {orderNumber && (
+              <p>Your order number is: <strong>{orderNumber}</strong></p>
+            )}
+          </Box>
+        </ColumnsWrapper>
+      </Center>
+    </Layout>
+  );
+}
 
   return (
     <Layout>

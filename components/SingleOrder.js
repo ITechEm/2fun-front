@@ -16,7 +16,8 @@ const getStatusColor = (status) => {
     case "Delivered":
       return "#16a34a";
     default:
-      return "#d1d5db";
+      case "Pending":
+      return "#fbbf24";
   }
 };
 
@@ -59,6 +60,13 @@ const ShowOrderButton = styled.button`
   }
 `;
 
+function formatStatus(status) {
+  if (!status) return "Pending";
+  return status
+    .split('-')
+    .map(s => s.charAt(0).toUpperCase() + s.slice(1))
+    .join(' ');
+}
 export default function SingleOrder({ line_items, createdAt, _id, ...rest }) {
   const statusColor = getStatusColor(rest.status);
 
@@ -66,7 +74,9 @@ export default function SingleOrder({ line_items, createdAt, _id, ...rest }) {
     <StyledOrder>
       <div>
         <OrderDetailsWrapper>
-          <StatusBadge bgColor={statusColor}>{rest.status}</StatusBadge>
+          <StatusBadge bgColor={statusColor}>
+  {formatStatus(rest.status)}
+</StatusBadge>
           <time>{new Date(createdAt).toLocaleString('RO')}</time>
         </OrderDetailsWrapper>
       </div>
