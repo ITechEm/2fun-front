@@ -66,6 +66,9 @@ const StatusBadge = styled.span`
   font-weight: bold;
   padding: 5px ;
 `;
+const TrackingInfo = styled.div`
+  color: #555;
+`;
 
 const getStatusColor = (status) => {
   switch (status) {
@@ -138,7 +141,11 @@ const OrderDetailsPage = () => {
       }
       return order.trackOrder;
     }
-    return "Tracking info will be available after your order is shipped.";
+    return <TrackingInfo>
+    <span>Tracking info will be available</span>
+    <br />
+    <span>after your order is shipped.</span>
+  </TrackingInfo>;
   };
 
   return (
