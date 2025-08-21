@@ -85,15 +85,21 @@ const OrderDetailsPage = () => {
   const [order, setOrder] = useState(null);
   const [shippingAddress, setShippingAddress] = useState(null);
   const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (orderId) {
+      setIsLoading(true);
       axios
         .get(`/api/orders/${orderId}`)
-        .then((res) => setOrder(res.data))
+        .then((res) => {
+          setOrder(res.data);
+          setIsLoading(false);
+        })
         .catch((err) => {
           console.error("Error fetching order:", err);
           setError("Failed to fetch order details");
+          setIsLoading(false);
         });
     }
   }, [orderId]);
@@ -112,7 +118,7 @@ const OrderDetailsPage = () => {
 
   if (error) return <p>{error}</p>;
   if (!orderId) return <p>Order not available!</p>;
-  if (!order || !shippingAddress) return <Spinner fullWidth />;
+  if (isLoading) return <Spinner fullWidth />;
 
   const itemTotal = order.line_items.reduce((acc, item) => {
     return acc + item.quantity * (item.price_data.unit_amount / 100);
@@ -121,12 +127,26 @@ const OrderDetailsPage = () => {
   const shippingCost = order.shippingAmount ? order.shippingAmount / 100 : 6.99;
   const totalAmount = itemTotal + shippingCost;
 
+  const renderTrackingInfo = () => {
+    if (order.trackOrder) {
+      if (order.trackOrder.startsWith("http")) {
+        return (
+          <a href={order.trackOrder} target="_blank" rel="noopener noreferrer">
+            Track your order here
+          </a>
+        );
+      }
+      return order.trackOrder;
+    }
+    return "Tracking info will be available after your order is shipped.";
+  };
+
   return (
     <Layout>
       <ColsWrapper>
         <Container>
           <OrderDetailContainer>
-            <h2 style={{ marginBottom: "10px" }}>Order Details</h2>          
+            <h2 style={{ marginBottom: "10px" }}>Order Details</h2>
             <p><strong>Order Number:</strong> {order.orderNumber}</p>
             <p style={{ marginBottom: "10px" }}><strong>Date:</strong> {new Date(order.createdAt).toLocaleString('RO')}</p>
             <p><strong>Status:</strong>{" "}
@@ -134,11 +154,9 @@ const OrderDetailsPage = () => {
                 {order.status}
               </StatusBadge>
             </p>
-            <p><strong>Tracking Info:</strong>            </p>
-            <p style={{ minHeight: "40px", whiteSpace: "pre-wrap", color: "#333", marginBottom: "10px"}}>
-              {order.trackOrder
-                ? (order.trackOrder)
-                : (<>Tracking info will be available <br />after your order is shipped.</>)}
+            <p><strong>Tracking Info:</strong></p>
+            <p style={{ minHeight: "40px", whiteSpace: "pre-wrap", color: "#333", marginBottom: "10px" }}>
+              {renderTrackingInfo()}
             </p>
             <p><strong>Total Payment:</strong> {totalAmount.toFixed(2)} €</p>
             <p><strong>Shipping:</strong> {shippingCost.toFixed(2)} €</p>
@@ -162,7 +180,7 @@ const OrderDetailsPage = () => {
             <h2 style={{ marginBottom: "10px" }}>Shipping Address:</h2>
             {shippingAddress ? (
               <>
-                {[
+                {[ 
                   { label: "Name", value: shippingAddress.name },
                   { label: "Email", value: shippingAddress.email },
                   { label: "Phone", value: shippingAddress.phone },
