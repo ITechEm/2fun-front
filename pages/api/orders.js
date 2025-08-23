@@ -8,17 +8,24 @@ export default async function handler(req, res) {
   await mongooseConnect();
 
   const { user } = await getServerSession(req, res, authOptions);
+
   if (!user) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
   if (req.method === "GET") {
-    const orders = await Order.find({ userEmail: user.email });
-    return res.json(orders);
+    try {
+      // Find orders for logged-in user, sorted by creation date
+      const orders = await Order.find({ userEmail: user.email }).sort({ createdAt: -1 }).lean();
+      return res.status(200).json(orders);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      return res.status(500).json({ message: "Error fetching orders" });
+    }
   }
 
   if (req.method === "POST") {
-    const { line_items, shippingAmount } = req.body;
+    const { line_items, shippingAmount, shippingAddress, name, email, city, postalCode, country, streetAddress } = req.body;
 
     if (!line_items || !shippingAmount) {
       return res.status(400).json({ message: "Missing required fields" });
@@ -33,13 +40,20 @@ export default async function handler(req, res) {
         status: "Pending",
         line_items,
         shippingAmount,
+        shippingAddress,
+        name,
+        email,
+        city,
+        postalCode,
+        country,
+        streetAddress,
         createdAt: new Date(),
       });
 
       await newOrder.save();
 
       await sendNewOrderEmail({
-        to: '2fun.shops@gmail.com',
+        to: 'admin@yourdomain.com',
         order: newOrder,
       });
 
