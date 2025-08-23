@@ -107,6 +107,8 @@ export default function ProfilePage() {
   const [confirmModal, setConfirmModal] = useState({ visible: false, type: null });
   const [toast, setToast] = useState(null);
   
+  const [clientNumber, setClientNumber] = useState('');
+  
   useEffect(() => {
     setWishlistLoaded(false);
     setOrderLoaded(false);
@@ -126,6 +128,7 @@ export default function ProfilePage() {
     });
 
     axios.get('/api/address').then(res => {
+      setClientNumber(res.data?.clientNumber || '');
       setName(res.data?.name || '');
       setEmail(res.data?.email || '');
       setphone(res.data?.phone || '');
@@ -256,6 +259,11 @@ export default function ProfilePage() {
                   <Spinner fullWidth />
                 ) : (
                   <>
+                  <Input
+  value={clientNumber}
+  disabled
+  placeholder="Client Number"
+/>
                     <Input
                       type="text"
                       placeholder="Name"

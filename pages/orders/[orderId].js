@@ -154,6 +154,7 @@ const OrderDetailsPage = () => {
         <Container>
           <OrderDetailContainer>
             <h2 style={{ marginBottom: "10px" }}>Order Details</h2>
+            <p style={{ textDecoration: "underline" }}><strong>{shippingAddress.clientNumber}</strong> </p>
             <p><strong>Order Number:</strong> {order.orderNumber}</p>
             <p style={{ marginBottom: "10px" }}><strong>Date:</strong> {new Date(order.createdAt).toLocaleString('RO')}</p>
             <p><strong>Status:</strong>{" "}
