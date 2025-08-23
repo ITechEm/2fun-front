@@ -7,7 +7,7 @@ function generateClientNumber() {
   // const datePart = now.toISOString().slice(0, 10).replace(/-/g, '');
   const timePart = now.toTimeString().slice(0, 8).replace(/:/g, '');
   const randomPart = Math.floor(1000 + Math.random() * 9000);
-  return `CN-${timePart}${randomPart}`;
+  return `${randomPart}${timePart}`;
 }
 
 export default async function handler(req, res) {

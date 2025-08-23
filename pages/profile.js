@@ -1,8 +1,9 @@
 'use client';
+
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
-import { signOut } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import WhiteBox from '@/components/WhiteBox';
 import Input from '@/components/Input';
 import Button from '@/components/Button';
@@ -11,7 +12,6 @@ import Spinner from '@/components/Spinner';
 import Tabs from '@/components/Tabs';
 import SingleOrder from '@/components/SingleOrder';
 import Center from '@/components/Center';
-import Header from '@/components/Header';
 import Layout from './layout';
 
 const ModalOverlay = styled.div`
@@ -86,6 +86,8 @@ const WishedProductsGrid = styled.div`
 `;
 
 export default function ProfilePage() {
+  const { data: session, status } = useSession();
+
   const [activeTab, setActiveTab] = useState('Orders');
   const [orders, setOrders] = useState([]);
   const [wishedProducts, setWishedProducts] = useState([]);
@@ -106,39 +108,71 @@ export default function ProfilePage() {
 
   const [confirmModal, setConfirmModal] = useState({ visible: false, type: null });
   const [toast, setToast] = useState(null);
-  
+
   const [clientNumber, setClientNumber] = useState('');
-  
+
   useEffect(() => {
+    if (status === 'unauthenticated') {
+      if (typeof window !== 'undefined') {
+        window.location.href = '/';
+      }
+    }
+  }, [status]);
+
+  useEffect(() => {
+    if (status !== 'authenticated') return;
+
     setWishlistLoaded(false);
     setOrderLoaded(false);
     setAddressLoaded(false);
 
-    axios.get('/api/orders').then(res => {
-      const sortedOrders = res.data.sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-      );
-      setOrders(sortedOrders);
-      setOrderLoaded(true);
-    });
+    axios.get('/api/orders')
+      .then(res => {
+        const sortedOrders = res.data.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        setOrders(sortedOrders);
+        setOrderLoaded(true);
+      })
+      .catch(() => {
+        setOrderLoaded(true);
+        setOrders([]);
+      });
 
-    axios.get('/api/wishlist').then(res => {
-      setWishedProducts(res.data.map(wp => wp.product));
-      setWishlistLoaded(true);
-    });
+    axios.get('/api/wishlist')
+      .then(res => {
+        setWishedProducts(res.data.map(wp => wp.product));
+        setWishlistLoaded(true);
+      })
+      .catch(() => {
+        setWishlistLoaded(true);
+        setWishedProducts([]);
+      });
 
-    axios.get('/api/address').then(res => {
-      setClientNumber(res.data?.clientNumber || '');
-      setName(res.data?.name || '');
-      setEmail(res.data?.email || '');
-      setphone(res.data?.phone || '');
-      setStreetAddress(res.data?.streetAddress || '');
-      setCity(res.data?.city || '');
-      setPostalCode(res.data?.postalCode || '');
-      setCountry(res.data?.country || '');
-      setAddressLoaded(true);
-    });
-  }, []);
+    axios.get('/api/address')
+      .then(res => {
+        setClientNumber(res.data?.clientNumber || '');
+        setName(res.data?.name || '');
+        setEmail(res.data?.email || '');
+        setphone(res.data?.phone || '');
+        setStreetAddress(res.data?.streetAddress || '');
+        setCity(res.data?.city || '');
+        setPostalCode(res.data?.postalCode || '');
+        setCountry(res.data?.country || '');
+        setAddressLoaded(true);
+      })
+      .catch(() => {
+        setAddressLoaded(true);
+        setClientNumber('');
+        setName('');
+        setEmail('');
+        setphone('');
+        setStreetAddress('');
+        setCity('');
+        setPostalCode('');
+        setCountry('');
+      });
+  }, [status]);
 
   function showToast(message, type = 'error') {
     setToast({ message, type });
@@ -149,7 +183,7 @@ export default function ProfilePage() {
     const data = { name, email, city, phone, streetAddress, postalCode, country };
     try {
       await axios.put('/api/address', data);
-      showToast('Settings saved!', 'success');
+      showToast('Shipping Address saved!', 'success');
     } catch (error) {
       console.error('Failed to save address:', error);
       showToast('Failed to save address', 'error');
@@ -200,10 +234,48 @@ export default function ProfilePage() {
     setWishedProducts(prev => prev.filter(p => p._id !== idToRemove));
   }
 
+  if (status === 'loading') {
+    return <Spinner fullWidth />;
+  }
+
+  if (status === 'unauthenticated') {
+    return null;
+  }
+
   return (
     <>
       <Layout>
         <Center>
+          <WhiteBox
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '20px',
+              marginTop: '20px',
+              marginBottom: '20px',
+            }}
+          >
+            <div
+              style={{
+                width: '80px',
+                height: '80px',
+                borderRadius: '50%',
+                backgroundColor: '#eee',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '24px',
+                fontWeight: 'bold',
+                color: '#555',
+              }}
+            >
+              {name?.charAt(0).toUpperCase() || 'A'}
+            </div>
+            <div>
+              <h3>{name}</h3>
+              <p>Client Number: {clientNumber}</p>
+            </div>
+          </WhiteBox>
           <ColsWrapper>
             <div>
               <WhiteBox>
@@ -259,11 +331,6 @@ export default function ProfilePage() {
                   <Spinner fullWidth />
                 ) : (
                   <>
-                  <Input
-  value={clientNumber}
-  disabled
-  placeholder="Client Number"
-/>
                     <Input
                       type="text"
                       placeholder="Name"
@@ -357,12 +424,8 @@ export default function ProfilePage() {
                 backgroundColor: toast.type === 'success' ? '#4BB543' : '#d32f2f',
                 color: 'white',
                 padding: '12px 24px',
-                borderRadius: '8px',
-                boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-                fontWeight: 'bold',
-                zIndex: 1000,
-                pointerEvents: 'none',
-                userSelect: 'none',
+                borderRadius: '6px',
+                zIndex: 9999,
               }}
             >
               {toast.message}

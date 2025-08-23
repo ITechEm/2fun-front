@@ -45,7 +45,7 @@ export default function AccountPage() {
               <p style={{ margin: "20px 0" }}>
                 You are logged in as <strong>{session.user?.email}</strong>.
               </p>
-              <Button primary onClick={() => signOut({ callbackUrl: "/" })}>
+              <Button primary onClick={() => signOut({ callbackUrl: "/" , redirect: true})}>
                 Logout
               </Button>
             </WhiteBox>
