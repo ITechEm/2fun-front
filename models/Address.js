@@ -9,6 +9,7 @@ const AddressSchema = new Schema({
   city: String,
   postalCode: String,
   country: String,
+  clientNumber: String,
 });
 
 export const Address = models?.Address || model('Address', AddressSchema);

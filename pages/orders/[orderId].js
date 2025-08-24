@@ -89,29 +89,33 @@ const OrderDetailsPage = () => {
   const [shippingAddress, setShippingAddress] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [clientNumber, setClientNumber] = useState('');
 
   useEffect(() => {
-    if (orderId) {
-      setIsLoading(true);
-      axios
-        .get(`/api/orders/${orderId}`)
-        .then((res) => {
-          setOrder(res.data);
-          setIsLoading(false);
-        })
-        .catch((err) => {
-          console.error("Error fetching order:", err);
-          setError("Failed to fetch order details");
-          setIsLoading(false);
-        });
-    }
-  }, [orderId]);
+  if (orderId) {
+    setIsLoading(true);
+    axios
+      .get(`/api/orders/${orderId}`)
+      .then((res) => {
+        setOrder(res.data);
+        setShippingAddress(res.data.shippingAddress);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching order:", err);
+        setError("Failed to fetch order details");
+        setIsLoading(false);
+      });
+  }
+}, [orderId]);
 
   useEffect(() => {
     if (orderId) {
       axios
         .get(`/api/address`)
-        .then((res) => setShippingAddress(res.data))
+        .then((res) => {
+          setClientNumber(res.data?.clientNumber || '');
+          setShippingAddress(res.data)})
         .catch((err) => {
           console.error("Error fetching shipping address:", err);
           setError("Failed to fetch shipping address");
@@ -154,7 +158,7 @@ const OrderDetailsPage = () => {
         <Container>
           <OrderDetailContainer>
             <h2 style={{ marginBottom: "10px" }}>Order Details</h2>
-            <p><strong>Client Number: </strong>{shippingAddress.clientNumber} </p>
+            <p><strong>Client Number: </strong>{clientNumber || "N/A"}</p>
             <p><strong>Order Number:</strong> {order.orderNumber}</p>
             <p style={{ marginBottom: "10px" }}><strong>Date:</strong> {new Date(order.createdAt).toLocaleString('RO')}</p>
             <p><strong>Status:</strong>{" "}
