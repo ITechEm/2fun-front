@@ -59,11 +59,30 @@ const WishedProductsGrid = styled.div`
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 30px;
-  
+
   @media screen and (max-width: 768px) {
     grid-template-columns: 2fr;
   }
 `;
+
+const MobileOnlyCentered = styled.div`
+  display: none;
+  margin-top: 20px;
+  justify-content: center;
+
+  @media screen and (max-width: 768px) {
+    display: flex;
+  }
+`;
+
+const PaginationWrapper = styled.div`
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+`;
+
 
 function ConfirmModal({ visible, onConfirm, onCancel, message }) {
   if (!visible) return null;
@@ -111,6 +130,22 @@ export default function ProfilePage() {
 
   const [clientNumber, setClientNumber] = useState('');
 
+  const ITEMS_PER_PAGE = 4;
+  const [ordersPage, setOrdersPage] = useState(1);
+  const [wishlistPage, setWishlistPage] = useState(1);
+
+  const ordersTotalPages = Math.ceil(orders.length / ITEMS_PER_PAGE);
+  const wishlistTotalPages = Math.ceil(wishedProducts.length / ITEMS_PER_PAGE);
+
+  const ordersToShow = orders.slice(
+    (ordersPage - 1) * ITEMS_PER_PAGE,
+    ordersPage * ITEMS_PER_PAGE
+  );
+  const wishlistToShow = wishedProducts.slice(
+    (wishlistPage - 1) * ITEMS_PER_PAGE,
+    wishlistPage * ITEMS_PER_PAGE
+  );
+
   useEffect(() => {
     if (status === 'unauthenticated') {
       if (typeof window !== 'undefined') {
@@ -118,6 +153,17 @@ export default function ProfilePage() {
       }
     }
   }, [status]);
+
+  const [isMobile, setIsMobile] = useState(false);
+
+useEffect(() => {
+  function handleResize() {
+    setIsMobile(window.innerWidth < 768);
+  }
+  handleResize();
+  window.addEventListener('resize', handleResize);
+  return () => window.removeEventListener('resize', handleResize);
+}, []);
 
   useEffect(() => {
     if (status !== 'authenticated') return;
@@ -133,6 +179,7 @@ export default function ProfilePage() {
         );
         setOrders(sortedOrders);
         setOrderLoaded(true);
+        setOrdersPage(1);
       })
       .catch(() => {
         setOrderLoaded(true);
@@ -143,6 +190,7 @@ export default function ProfilePage() {
       .then(res => {
         setWishedProducts(res.data.map(wp => wp.product));
         setWishlistLoaded(true);
+        setWishlistPage(1);
       })
       .catch(() => {
         setWishlistLoaded(true);
@@ -279,26 +327,49 @@ export default function ProfilePage() {
           <ColsWrapper>
             <div>
               <WhiteBox>
-                <Tabs 
-                  tabs={ ['Orders', 'Wishlist']}
+                <Tabs
+                  tabs={['Orders', 'Wishlist']}
                   active={activeTab}
                   onChange={setActiveTab}
                 />
 
                 {activeTab === 'Orders' && (
-                  <>
-                    {!orderLoaded ? (
-                      <Spinner fullWidth />
-                    ) : (
-                      <>
-                        {orders.length === 0 && (
-                          <p style={{ textAlign: "center", marginTop: "20px" }}>
-                            No orders yet.
-                          </p>
-                          )}
-                        {orders.map(order => (
-                          <SingleOrder key={order._id} {...order} />
-                        ))}
+                <>
+                  {!orderLoaded ? (
+                    <Spinner fullWidth />
+                  ) : orders.length === 0 ? (
+                    <p style={{ textAlign: 'center', marginTop: '20px' }}>
+                      No orders yet.
+                    </p>
+                  ) : (
+                    <>
+                      {(isMobile ? ordersToShow : orders).map(order => (
+                        <SingleOrder key={order._id} {...order} />
+                      ))}
+
+                      {isMobile && ordersTotalPages > 1 && (
+                        <MobileOnlyCentered>
+                          {[...Array(ordersTotalPages)].map((_, i) => (
+                            <button
+                              key={i}
+                              style={{
+                                fontWeight: ordersPage === i + 1 ? 'bold' : 'normal',
+                                backgroundColor:
+                                  ordersPage === i + 1 ? '#000' : '#eee',
+                                color: ordersPage === i + 1 ? '#fff' : '#000',
+                                margin: '0 4px',
+                                padding: '8px 14px',
+                                borderRadius: '6px',
+                                border: 'none',
+                                cursor: 'pointer',
+                              }}
+                              onClick={() => setOrdersPage(i + 1)}
+                            >
+                              {i + 1}
+                            </button>
+                            ))}
+                          </MobileOnlyCentered>
+                        )}
                       </>
                     )}
                   </>
@@ -308,15 +379,14 @@ export default function ProfilePage() {
                   <>
                     {!wishlistLoaded ? (
                       <Spinner fullWidth />
+                    ) : wishedProducts.length === 0 ? (
+                      <p style={{ textAlign: 'center', marginTop: '20px' }}>
+                        Your wishlist is empty.
+                      </p>
                     ) : (
                       <>
-                        {wishedProducts.length === 0 && (
-                          <p style={{ textAlign: "center", marginTop: "20px" }}>
-                            Your wishlist is empty.
-                          </p>
-                        )}
                         <WishedProductsGrid>
-                          {wishedProducts.map((wp) => (
+                          {wishlistToShow.map(wp => (
                             <ProductBox
                               key={wp._id}
                               {...wp}
@@ -325,6 +395,29 @@ export default function ProfilePage() {
                             />
                           ))}
                         </WishedProductsGrid>
+                        {wishlistTotalPages > 1 && (
+                         <PaginationWrapper>
+                            {[...Array(wishlistTotalPages)].map((_, i) => (
+                              <button
+                                key={i}
+                                style={{
+                                  fontWeight: wishlistPage === i + 1 ? 'bold' : 'normal',
+                                  backgroundColor: wishlistPage === i + 1 ? '#000' : '#eee',
+                                  color: wishlistPage === i + 1 ? '#fff' : '#000',
+                                  margin: '0 4px',
+                                  padding: '8px 14px',
+                                  borderRadius: '6px',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  minWidth: '35px',
+                                }}
+                                onClick={() => setWishlistPage(i + 1)}
+                              >
+                              {i + 1}
+                              </button>
+                            ))}
+                          </PaginationWrapper>
+                        )}
                       </>
                     )}
                   </>
@@ -334,56 +427,58 @@ export default function ProfilePage() {
 
             <div>
               <WhiteBox>
-                <h2 style={{ textAlign: "center", marginBottom: "10px" }} >Shipping Address</h2>
+                <h2>Your Shipping Address</h2>
+
                 {!addressLoaded ? (
                   <Spinner fullWidth />
                 ) : (
                   <>
                     <Input
                       type="text"
-                      placeholder="Name"
+                      placeholder="Your name"
                       value={name}
-                      onChange={e => setName(e.target.value)}
+                      onChange={ev => setName(ev.target.value)}
                     />
                     <Input
+                      type="email"
+                      placeholder="Your email"
                       value={email}
-                      disabled
+                      onChange={ev => setEmail(ev.target.value)}
                     />
                     <Input
                       type="text"
-                      placeholder="(+)407xx xxx xxx"
+                      placeholder="Phone number"
                       value={phone}
-                      onChange={e => setphone(e.target.value)}
+                      onChange={ev => setphone(ev.target.value)}
                     />
                     <Input
                       type="text"
-                      placeholder="Street Address"
+                      placeholder="Street address"
                       value={streetAddress}
-                      onChange={e => setStreetAddress(e.target.value)}
+                      onChange={ev => setStreetAddress(ev.target.value)}
                     />
                     <CityHolder>
                       <Input
                         type="text"
                         placeholder="City"
                         value={city}
-                        onChange={e => setCity(e.target.value)}
+                        onChange={ev => setCity(ev.target.value)}
                       />
                       <Input
                         type="text"
-                        placeholder="Postal Code"
+                        placeholder="Postal code"
                         value={postalCode}
-                        onChange={e => setPostalCode(e.target.value)}
+                        onChange={ev => setPostalCode(ev.target.value)}
                       />
                     </CityHolder>
-
                     <Input
                       type="text"
                       placeholder="Country"
                       value={country}
-                      onChange={e => setCountry(e.target.value)}
+                      onChange={ev => setCountry(ev.target.value)}
+                      
                     />
-
-                    <Button black block onClick={saveAddress}>
+                    <Button style={{ marginTop: '20px' }} black block onClick={saveAddress}>
                       Save
                     </Button>
 
@@ -392,7 +487,7 @@ export default function ProfilePage() {
                       block
                       onClick={() => handleDelete('address')}
                       disabled={deletingAddress}
-                      style={{ marginTop: '10px' }}
+                      style={{ marginTop: '20px' }}
                     >
                       {deletingAddress ? 'Deleting Address...' : 'Delete Address'}
                     </Button>
@@ -402,7 +497,7 @@ export default function ProfilePage() {
                       block
                       onClick={() => handleDelete('account')}
                       disabled={deletingAccount}
-                      style={{ marginTop: '20px' }}
+                      style={{ marginTop: '10px', color: '#d32f2f'}}
                     >
                       {deletingAccount ? 'Deleting Account...' : 'Delete Account'}
                     </Button>
@@ -411,18 +506,21 @@ export default function ProfilePage() {
               </WhiteBox>
             </div>
           </ColsWrapper>
+        </Center>
+      </Layout>
 
-          <ConfirmModal
-            visible={confirmModal.visible}
-            message={
-              confirmModal.type === 'address'
-                ? 'This will permanently remove your shipping details.'
-                : 'This will permanently delete your account.'
-            }
-            onCancel={() => setConfirmModal({ visible: false, type: null })}
-            onConfirm={confirmDelete}
-          />
-          {toast && (
+      <ConfirmModal
+        visible={confirmModal.visible}
+        message={
+          confirmModal.type === 'account'
+            ? 'This will permanently delete your account and all data.'
+            : 'This will permanently delete your saved shipping address.'
+        }
+        onConfirm={confirmDelete}
+        onCancel={() => setConfirmModal({ visible: false, type: null })}
+      />
+
+      {toast && (
             <div
               style={{
                 position: 'fixed',
@@ -439,8 +537,6 @@ export default function ProfilePage() {
               {toast.message}
             </div>
           )}
-        </Center>
-      </Layout>
     </>
   );
 }
