@@ -39,6 +39,32 @@ const ModalButtons = styled.div`
   justify-content: center;
 `;
 
+const ColsWrapper = styled.div`
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 40px;
+  margin: 40px 0;
+
+  @media screen and (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const CityHolder = styled.div`
+  display: flex;
+  gap: 5px;
+`;
+
+const WishedProductsGrid = styled.div`
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 30px;
+  
+  @media screen and (max-width: 768px) {
+    grid-template-columns: 2fr;
+  }
+`;
+
 function ConfirmModal({ visible, onConfirm, onCancel, message }) {
   if (!visible) return null;
   return (
@@ -58,32 +84,6 @@ function ConfirmModal({ visible, onConfirm, onCancel, message }) {
     </ModalOverlay>
   );
 }
-
-const ColsWrapper = styled.div`
-  display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  gap: 40px;
-  margin: 40px 0;
-
-  @media screen and (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const CityHolder = styled.div`
-  display: flex;
-  gap: 5px;
-`;
-
-const WishedProductsGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
-
-  @media screen and (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
-`;
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
@@ -279,8 +279,8 @@ export default function ProfilePage() {
           <ColsWrapper>
             <div>
               <WhiteBox>
-                <Tabs
-                  tabs={['Orders', 'Wishlist']}
+                <Tabs 
+                  tabs={ ['Orders', 'Wishlist']}
                   active={activeTab}
                   onChange={setActiveTab}
                 />
@@ -291,7 +291,11 @@ export default function ProfilePage() {
                       <Spinner fullWidth />
                     ) : (
                       <>
-                        {orders.length === 0 && <p>No orders yet.</p>}
+                        {orders.length === 0 && (
+                          <p style={{ textAlign: "center", marginTop: "20px" }}>
+                            No orders yet.
+                          </p>
+                          )}
                         {orders.map(order => (
                           <SingleOrder key={order._id} {...order} />
                         ))}
@@ -306,9 +310,13 @@ export default function ProfilePage() {
                       <Spinner fullWidth />
                     ) : (
                       <>
-                        {wishedProducts.length === 0 && <p>Your wishlist is empty.</p>}
+                        {wishedProducts.length === 0 && (
+                          <p style={{ textAlign: "center", marginTop: "20px" }}>
+                            Your wishlist is empty.
+                          </p>
+                        )}
                         <WishedProductsGrid>
-                          {wishedProducts.map(wp => (
+                          {wishedProducts.map((wp) => (
                             <ProductBox
                               key={wp._id}
                               {...wp}
@@ -326,7 +334,7 @@ export default function ProfilePage() {
 
             <div>
               <WhiteBox>
-                <h2>Shipping Address</h2>
+                <h2 style={{ textAlign: "center", marginBottom: "10px" }} >Shipping Address</h2>
                 {!addressLoaded ? (
                   <Spinner fullWidth />
                 ) : (
