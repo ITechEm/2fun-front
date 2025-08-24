@@ -132,7 +132,7 @@ const SideIcons = styled.div`
   display: flex;
   align-items: center;
   gap: 20px;
-  margin-left: 500px;
+  margin-left: 400px;
 
   a, button {
     display: inline-flex;
@@ -197,7 +197,9 @@ function AuthLinks({ status, userName }) {
   if (status === 'authenticated') {
     return (
       <>
-        <NavLink href="/profile">Hi, {userName}</NavLink>
+        <NavLink href="/profile" style={{ display: 'inline-block', minWidth: '100px'  }}>
+          Hi, {userName}
+        </NavLink>
         <button onClick={() => signOut()} title="Sign out">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
@@ -234,7 +236,6 @@ export default function Header({ children }) {
               <img src="/logo.png" alt="Logo" />
             </Logo>
 
-            {/* Hamburger button toggles mobile nav */}
             <NavButton onClick={handleNavToggle} aria-label="Toggle navigation menu" mobileNavActive={mobileNavActive}>
               {mobileNavActive ? <XIcon /> : <BarsIcon />}
             </NavButton>
