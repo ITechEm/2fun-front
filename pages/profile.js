@@ -13,6 +13,7 @@ import Tabs from '@/components/Tabs';
 import SingleOrder from '@/components/SingleOrder';
 import Center from '@/components/Center';
 import Layout from './layout';
+import  ConfirmModal from '@/components/ConfirmModal';
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -83,30 +84,9 @@ const PaginationWrapper = styled.div`
   gap: 8px;
 `;
 
-
-function ConfirmModal({ visible, onConfirm, onCancel, message }) {
-  if (!visible) return null;
-  return (
-    <ModalOverlay>
-      <ModalBox>
-        <h3>Are you sure?</h3>
-        <p>{message}</p>
-        <ModalButtons>
-          <Button onClick={onCancel} style={{ backgroundColor: '#ccc', color: '#000' }}>
-            Cancel
-          </Button>
-          <Button onClick={onConfirm} red>
-            Confirm
-          </Button>
-        </ModalButtons>
-      </ModalBox>
-    </ModalOverlay>
-  );
-}
-
 export default function ProfilePage() {
   const { data: session, status } = useSession();
-
+  
   const [activeTab, setActiveTab] = useState('Orders');
   const [orders, setOrders] = useState([]);
   const [wishedProducts, setWishedProducts] = useState([]);
@@ -122,7 +102,6 @@ export default function ProfilePage() {
   const [postalCode, setPostalCode] = useState('');
   const [country, setCountry] = useState('');
 
-  const [deletingAddress, setDeletingAddress] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
 
   const [confirmModal, setConfirmModal] = useState({ visible: false, type: null });
@@ -136,6 +115,7 @@ export default function ProfilePage() {
 
   const ordersTotalPages = Math.ceil(orders.length / ITEMS_PER_PAGE);
   const wishlistTotalPages = Math.ceil(wishedProducts.length / ITEMS_PER_PAGE);
+  
 
   const ordersToShow = orders.slice(
     (ordersPage - 1) * ITEMS_PER_PAGE,
@@ -245,37 +225,24 @@ useEffect(() => {
   async function confirmDelete() {
     const type = confirmModal.type;
     setConfirmModal({ visible: false, type: null });
-
-    if (type === 'address') {
-      try {
-        setDeletingAddress(true);
-        await axios.delete('/api/delete-address');
-        setphone('');
-        setStreetAddress('');
-        setCity('');
-        setPostalCode('');
-        setCountry('');
-        showToast('Address deleted successfully', 'success');
-      } catch (error) {
-        console.error('Delete address error:', error);
-        showToast('Failed to delete address', 'error');
-      } finally {
-        setDeletingAddress(false);
-      }
-    }
-
     if (type === 'account') {
-      try {
-        setDeletingAccount(true);
-        await axios.delete('/api/delete-account');
+    try {
+      setDeletingAccount(true);
+      const res = await axios.delete('/api/delete-account');
+
+      if (res.status === 200) {
         showToast('Account deleted successfully', 'success');
         await signOut({ callbackUrl: '/' });
-      } catch (error) {
-        console.error('Delete account error:', error);
+      } else {
         showToast('Failed to delete account', 'error');
-        setDeletingAccount(false);
       }
+    } catch (error) {
+      console.error('Delete account error:', error);
+      showToast('Failed to delete account', 'error');
+    } finally {
+      setDeletingAccount(false);
     }
+  }
   }
 
   function productRemovedFromWishlist(idToRemove) {
@@ -320,7 +287,7 @@ useEffect(() => {
               {name?.charAt(0).toUpperCase() || 'A'}
             </div>
             <div>
-              <h3>{name}</h3>
+              <h3>{name?.trim() ? name : 'User Name'}</h3>
               <p>Client Number: {clientNumber}</p>
             </div>
           </WhiteBox>
@@ -427,7 +394,7 @@ useEffect(() => {
 
             <div>
               <WhiteBox>
-                <h2>Your Shipping Address</h2>
+                <h2 style={{ marginBottom: '40px', textAlign: 'center' }}>Shipping Address</h2>
 
                 {!addressLoaded ? (
                   <Spinner fullWidth />
@@ -444,6 +411,7 @@ useEffect(() => {
                       placeholder="Your email"
                       value={email}
                       onChange={ev => setEmail(ev.target.value)}
+                      disabled
                     />
                     <Input
                       type="text"
@@ -478,18 +446,8 @@ useEffect(() => {
                       onChange={ev => setCountry(ev.target.value)}
                       
                     />
-                    <Button style={{ marginTop: '20px' }} black block onClick={saveAddress}>
+                    <Button style={{ marginTop: '10px' }} black block onClick={saveAddress}>
                       Save
-                    </Button>
-
-                    <Button
-                      red
-                      block
-                      onClick={() => handleDelete('address')}
-                      disabled={deletingAddress}
-                      style={{ marginTop: '20px' }}
-                    >
-                      {deletingAddress ? 'Deleting Address...' : 'Delete Address'}
                     </Button>
 
                     <Button
@@ -497,7 +455,7 @@ useEffect(() => {
                       block
                       onClick={() => handleDelete('account')}
                       disabled={deletingAccount}
-                      style={{ marginTop: '10px', color: '#d32f2f'}}
+                      style={{ marginTop: '20px', color: '#d32f2f'}}
                     >
                       {deletingAccount ? 'Deleting Account...' : 'Delete Account'}
                     </Button>
@@ -510,15 +468,11 @@ useEffect(() => {
       </Layout>
 
       <ConfirmModal
-        visible={confirmModal.visible}
-        message={
-          confirmModal.type === 'account'
-            ? 'This will permanently delete your account and all data.'
-            : 'This will permanently delete your saved shipping address.'
-        }
-        onConfirm={confirmDelete}
-        onCancel={() => setConfirmModal({ visible: false, type: null })}
-      />
+  visible={confirmModal.visible}
+  type={confirmModal.type}
+  onConfirmDelete={confirmDelete}   // ✅ Make sure this is passed
+  onCancel={() => setConfirmModal({ visible: false, type: null })}
+/>
 
       {toast && (
             <div
