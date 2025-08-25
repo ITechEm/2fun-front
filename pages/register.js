@@ -115,27 +115,30 @@ export default function RegisterPage() {
   const router = useRouter();
 
   const handleRegister = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!name || !email || !password) {
-      setFormError('Toate câmpurile sunt obligatorii.');
-      return;
-    }
+  if (!name || !email || !password) {
+    setFormError('Toate câmpurile sunt obligatorii.');
+    return;
+  }
 
-    if (password.length < 6 || password.length > 12) {
-      setFormError('Parola trebuie să fie între 6 și 12 caractere.');
-      return;
-    }
+  if (password.length < 6 || password.length > 12) {
+    setFormError('Parola trebuie să fie între 6 și 12 caractere.');
+    return;
+  }
 
-    setFormError('');
+  setFormError('');
 
-    try {
-      await axios.post('/api/register', { name, email, password });
-      router.push('/login');
-    } catch (error) {
-      setFormError(error.response?.data?.error || 'Error registering');
-    }
-  };
+  try {
+    
+    await axios.post('/api/send-verification-code', { name, email, password });
+
+   
+    router.push(`/verify?email=${encodeURIComponent(email)}`);
+  } catch (error) {
+    setFormError(error.response?.data?.error || 'Error sending verification email');
+  }
+};
 
   useEffect(() => {
     if (formError) {
