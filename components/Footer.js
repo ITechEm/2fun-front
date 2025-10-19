@@ -196,14 +196,30 @@ const Footer = () => {
       </FooterContainer>
 
       <FooterBottom>
-        <img src="paypal.png" alt="PayPal" />
-        <img src="visa.png" alt="Visa" />
-        <img src="mastercard.png" alt="MasterCard" />
-      </FooterBottom>
+      <div>
+        {/* Other payment icons */}
+        <img src="paypal.png" alt="PayPal" style={{ width: "40px", marginRight: "10px" }} />
+        <img src="visa.png" alt="Visa" style={{ width: "40px", marginRight: "10px" }} />
+        <img src="mastercard.png" alt="MasterCard" style={{ width: "40px", marginRight: "10px" }} />
+      </div>
+      
+      {/* Stripe Logo and Powered by Text */}
+      <div style={{ display: "flex"}}>
+       
+         <a 
+          href="https://stripe.com" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          style={{ color: "#ffffffff", textDecoration: "none" }}
+        >
+          Secured by Stripe
+        </a>
+      </div>
+    </FooterBottom>
 
       <FooterBottom>
         <div style={{ textAlign: 'center', color: '#ccc' }}>
-          Copyright &copy; 2025 All rights reserved.{' '}
+          Copyright &copy; 2023 All rights reserved.{' '}
           <a href="/privacy-policy" target="_blank" style={{ color: '#ccc' }}>Privacy Policy</a> |{' '}
           <a href="/terms-conditions" target="_blank" style={{ color: '#ccc' }}>Terms & Conditions</a>
         </div>

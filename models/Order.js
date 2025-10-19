@@ -11,11 +11,13 @@ const OrderSchema = new Schema({
   city:String,
   postalCode:String,
   country:String,
+  isApproved: { type: Boolean},
   paid:Boolean,
   status: {
   type: String,
   enum: ["Cancelled", "Pending", "In Progress", "In Delivery", "Delivered"],
   default: "Pending",
+  shippingFee: { type: Number, default: 0 }
 }
 }, {
   timestamps: true,

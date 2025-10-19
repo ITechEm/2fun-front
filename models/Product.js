@@ -11,6 +11,7 @@ const ProductSchema = new Schema({
   inStock: { type: Boolean, default: true },
 }, {
   timestamps: true,
+  weight: { type: Number, default: 2 },
 });
 
 export const Product = models.Product || model('Product', ProductSchema);

@@ -134,10 +134,10 @@ export default function Featured({ product }) {
                 <PurpleButton href={`/product/${product._id}`} outline>
                   Read more
                 </PurpleButton>
-                <PurpleFlyingButton white _id={product._id} src={product.images?.[0]}>
+                {/* <PurpleFlyingButton white _id={product._id} src={product.images?.[0]}>
                   <CartIcon />
                   Add to cart
-                </PurpleFlyingButton>
+                </PurpleFlyingButton> */}
               </Buttons>
             </RevealWrapper>
           </TextContent>

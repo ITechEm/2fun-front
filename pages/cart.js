@@ -205,39 +205,18 @@ useEffect(() => {
   }
 
   async function goToPayment() {
+  if (!session) {
+    setPopupMessage("You should login before placing an order.");
+    return;
+  }
   if (cartProducts.length === 0) {
-    setErrorMessage("Your cart is empty. Please add items before proceeding.");
+    setPopupMessage("Your cart is empty. Please add items before placing an order.");
     return;
   }
 
-  // Validate fields
-  if (!name || !name.trim()) {
-    setPopupMessage('The Name is required!\nPlease update your Profile');
-    return;
-  }
-  if (!email || !email.trim()) {
-    setPopupMessage('The Email is required!\nPlease update your Profile');
-    return;
-  }
-  
-  if (!phone || !(typeof phone === 'string' ? phone.trim() : String(phone).trim())) {
-    setPopupMessage('The Phone Number is required!\nPlease update your Profile');
-    return;
-  }
-  if (!streetAddress || !streetAddress.trim()) {
-    setPopupMessage('The Street Address is required!\nPlease update your Profile');
-    return;
-  }
-  if (!city || !city.trim()) {
-    setPopupMessage('The City is required!\nPlease update your Profile');
-    return;
-  }
-  if (!postalCode || !postalCode.trim()) {
-    setPopupMessage('The Postal Code is required!\nPlease update your Profile');
-    return;
-  }
-  if (!country || !country.trim()) {
-    setPopupMessage('The Country is required!\nPlease update your Profile');
+  // Validate shipping fields before sending data
+  if (!name || !email || !phone || !streetAddress || !city || !postalCode || !country) {
+    setPopupMessage("Please complete your shipping address before placing an order.");
     return;
   }
 
@@ -251,21 +230,24 @@ useEffect(() => {
       streetAddress,
       country,
       cartProducts,
+      isApproved: false,
     });
 
-    if (response.data.url) {
-  if (response.data.orderNumber) {
-    localStorage.setItem('orderNumber', response.data.orderNumber);
-  }
-  window.location = response.data.url;
-} else {
-      setPopupMessage('There was an issue with the payment process.');
+    if (response.data.orderNumber) {
+      setOrderNumber(response.data.orderNumber);
+      setIsSuccess(true);
+      clearCart();
+      router.push(`/order-under-review?orderNumber=${response.data.orderNumber}`);
+    } else {
+      setPopupMessage('There was an issue with the order process.');
     }
   } catch (error) {
     console.error("Error during checkout:", error);
-    setErrorMessage("There was an error with the Payment process. Please review your Shipping Address.");
+    setErrorMessage("There was an error with the order process. Please review your Shipping Address.");
   }
 }
+
+
 
   // Updated product total calculation with checks for missing product data
   let productsTotal = 0;
@@ -283,7 +265,7 @@ useEffect(() => {
         <ColumnsWrapper>
           <Box>
             <h1>Thanks for your order!</h1>
-            <p>We will email you when your order is shipped.</p>
+            <p>We will email you with more details after your order is reviewed.</p>
             {orderNumber && (
               <p>Your order number is: <strong>{orderNumber}</strong></p>
             )}
@@ -331,16 +313,9 @@ useEffect(() => {
                         <td>€{cartProducts.filter(id => id === product._id).length * product.price}</td>
                       </tr>
                     ))}
-                    <tr className="subtotal">
-                      <td colSpan={2}>Products</td>
-                      <td>€{productsTotal}</td>
-                    </tr>
-                    <tr className="subtotal">
-                      <td colSpan={2}>Shipping</td>
-                      <td>€{shippingFee}</td>
-                    </tr>
+                    
                     <tr className="subtotal total">
-                      <td colSpan={2}>Total</td>
+                      <td colSpan={2}>Total products price</td>
                       <td>€{productsTotal + parseInt(shippingFee || 0)}</td>
                     </tr>
                   </tbody>
@@ -348,7 +323,24 @@ useEffect(() => {
               )}
               {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
              <ButtonPay>
-              <Button onClick={goToPayment}>Proceed to Payment</Button>
+              <Button
+    onClick={() => {
+      if (!session) {
+        setPopupMessage("You should login before placing an order.");
+        return;
+        
+      }
+      
+      if (cartProducts.length === 0) {
+        setPopupMessage("Your cart is empty. Please add items before placing an order.");
+        return;
+      }
+      goToPayment();
+    }}
+    disabled={cartProducts.length === 0}
+  >
+    Place the order
+  </Button>
               </ButtonPay> 
             </Box>
           </RevealWrapper>

@@ -25,9 +25,9 @@ export default async function handler(req, res) {
   }
 
   if (req.method === "POST") {
-    const { line_items, shippingAmount, shippingAddress, name, email, city, postalCode, country, streetAddress } = req.body;
+    const { line_items, shippingFee, shippingAddress, name, email, city, postalCode, country, streetAddress } = req.body;
 
-    if (!line_items || !shippingAmount) {
+    if (!line_items || !shippingFee) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
@@ -39,7 +39,7 @@ export default async function handler(req, res) {
         orderNumber,
         status: "Pending",
         line_items,
-        shippingAmount,
+        shippingFee,
         shippingAddress,
         name,
         email,
@@ -48,6 +48,7 @@ export default async function handler(req, res) {
         country,
         streetAddress,
         createdAt: new Date(),
+        isApproved,
       });
 
       await newOrder.save();

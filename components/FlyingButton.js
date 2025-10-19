@@ -37,13 +37,18 @@ export default function FlyingButton(props) {
   const {addProduct} = useContext(CartContext);
   const imgRef = useRef();
   function sendImageToCart(ev) {
-    imgRef.current.style.display = 'inline-block';
-    imgRef.current.style.left = (ev.clientX-50) + 'px';
-    imgRef.current.style.top = (ev.clientY-50) + 'px';
-    setTimeout(() => {
+  if (!imgRef.current) return;  // <-- safety check
+
+  imgRef.current.style.display = 'inline-block';
+  imgRef.current.style.left = (ev.clientX - 50) + 'px';
+  imgRef.current.style.top = (ev.clientY - 50) + 'px';
+
+  setTimeout(() => {
+    if (imgRef.current) {  // <-- another safety check inside timeout
       imgRef.current.style.display = 'none';
-    }, 1000);
-  }
+    }
+  }, 1000);
+}
   useEffect(() => {
     const interval = setInterval(() => {
       const reveal = imgRef.current?.closest('div[data-sr-id]');
