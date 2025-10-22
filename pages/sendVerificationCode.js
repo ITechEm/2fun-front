@@ -10,9 +10,6 @@ import {
   Text,
 } from '@react-email/components';
 
-const baseUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : '';
 
 export const PlaidVerifyIdentityEmail = ({ validationCode }) => (
   <Html>
@@ -20,7 +17,7 @@ export const PlaidVerifyIdentityEmail = ({ validationCode }) => (
     <Body style={main}>
       <Container style={container}>
         <Img
-          src={`${baseUrl}/public/logo.png`}
+          src={`/public/logo.png`}
           width="212"
           height="88"
           alt="Plaid"

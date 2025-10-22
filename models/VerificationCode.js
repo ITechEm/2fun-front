@@ -5,12 +5,12 @@ const verificationCodeSchema = new mongoose.Schema({
   name: String,
   password: String,
   code: { type: String, required: true },
-  createdAt: {
+  expiresAt: {
     type: Date,
-    default: Date.now,
-    expires: 120,
+    required: true,
+    index: { expires: 0 },
   },
-});
+}, { timestamps: true });
 
 export const VerificationCode = mongoose.models.VerificationCode || mongoose.model('VerificationCode', verificationCodeSchema);
 
