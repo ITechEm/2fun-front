@@ -228,7 +228,7 @@ useEffect(() => {
     );
   };
 
-  // Updated payment handler
+
   const handlePayClick = async () => {
     if (!session) {
       setError("You must be logged in to make a payment.");
