@@ -339,7 +339,7 @@ useEffect(() => {
 
   {!order.isApproved && !isPaid && (
     <p style={{ color: "gray", fontStyle: "italic" }}>
-      Your order is being verified. You'll be able to pay once it's approved.
+      Your order is being verified. You&apos;ll be able to pay once it&apos;s approved.
     </p>
   )}
 
