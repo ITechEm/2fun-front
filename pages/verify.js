@@ -79,76 +79,69 @@ const TimerText = styled.p`
   text-align: center;
 `;
 
+
 export default function VerifyPage() {
   const router = useRouter();
-  const [code, setCode] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [email, setEmail] = useState('');
+  const [code, setCode] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [email, setEmail] = useState("");
   const [secondsLeft, setSecondsLeft] = useState(120);
-  const [resending, setResending] = useState(false);
 
   useEffect(() => {
     if (router.query.email) {
       setEmail(router.query.email);
-      localStorage.setItem('pendingEmail', router.query.email);
+      localStorage.setItem("pendingEmail", router.query.email);
     } else {
-      const savedEmail = localStorage.getItem('pendingEmail');
+      const savedEmail = localStorage.getItem("pendingEmail");
       if (savedEmail) setEmail(savedEmail);
     }
   }, [router.query.email]);
 
   useEffect(() => {
+    if (secondsLeft <= 0) {
+
+      setError("Verification time expired. Restart registration.");
+      setTimeout(() => {
+        localStorage.removeItem("pendingEmail");
+        router.push("/register");
+      }, 2000);
+      return;
+    }
+
     const timer = setInterval(() => {
       setSecondsLeft((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
-
     return () => clearInterval(timer);
-  }, []);
+  }, [secondsLeft]);
 
   const verifyCode = async (e) => {
     e.preventDefault();
 
     if (!email || !code) {
-      setError('Code is missing');
+      setError("Code is missing");
       return;
     }
 
     try {
-      await axios.post('/api/verify-code', { email, code }, {
-        headers: { 'Content-Type': 'application/json' },
-      });
-      setSuccess('Account verified. Redirecting...');
+      await axios.post(
+        "/api/verify-code",
+        { email, code },
+        { headers: { "Content-Type": "application/json" } }
+      );
+      setSuccess("✅ Account verified. Redirecting...");
       localStorage.removeItem("pendingEmail");
-      setTimeout(() => router.push('/login'), 2000);
+      setTimeout(() => router.push("/login"), 2000);
     } catch (err) {
-      setError(err.response?.data?.error || 'Invalid code');
-    }
-  };
-
-  const resendCode = async () => {
-    setResending(true);
-    setError('');
-    try {
-      await axios.post('/api/send-verification-code', { email });
-      setSecondsLeft(120);
-    } catch (err) {
-      setError('Failed to resend code');
-    }
-    setResending(false);
-  };
-
-  const handleButtonClick = (e) => {
-    if (secondsLeft === 0) {
-      resendCode();
-    } else {
-      verifyCode(e);
+      setError(err.response?.data?.error || "❌ Invalid code");
     }
   };
 
   const formatTime = (seconds) => {
-    const min = Math.floor(seconds / 60).toString().padStart(2, '0');
-    const sec = (seconds % 60).toString().padStart(2, '0');
+    const min = Math.floor(seconds / 60)
+      .toString()
+      .padStart(2, "0");
+    const sec = (seconds % 60).toString().padStart(2, "0");
     return `${min}:${sec}`;
   };
 
@@ -156,27 +149,28 @@ export default function VerifyPage() {
     <Layout>
       <Center>
         <VerifyWrapper>
-          <form onSubmit={handleButtonClick} style={{ width: '100%' }}>
+          <form onSubmit={verifyCode} style={{ width: "100%" }}>
             <Title>Verify Email</Title>
-            <InfoText>We sent a code to <strong>{email}</strong></InfoText>
+            <InfoText>
+              We sent a code to <strong>{email}</strong>
+            </InfoText>
 
             <StyledInput
               type="text"
-              placeholder="Code"
+              placeholder="Enter verification code"
               value={code}
               onChange={(e) => setCode(e.target.value)}
-              
             />
+
             <TimerText>
               {secondsLeft > 0
                 ? `Code expires in ${formatTime(secondsLeft)}`
-                : 'Code expired. You can resend it'}
+                : "Verification expired — restarting registration..."}
             </TimerText>
-            <StyledButton type="submit">
-              {secondsLeft === 0 ? (resending ? 'Resending...' : 'Resend Code') : 'Verify'}
-            </StyledButton>
 
-            
+            <StyledButton type="submit" disabled={secondsLeft <= 0}>
+              Verify
+            </StyledButton>
 
             {error && <ErrorText>{error}</ErrorText>}
             {success && <SuccessText>{success}</SuccessText>}

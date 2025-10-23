@@ -1,103 +1,82 @@
-import { Resend } from 'resend';
-import sendVerificationCode from 'pages/sendVerificationCode.js';
+import { Resend } from "resend"
 import { VerificationCode } from "@/models/VerificationCode";
 import { mongooseConnect } from "@/lib/mongoose";
 import bcrypt from "bcryptjs";
+import { User } from "@/models/User";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   const { email, name, password } = req.body;
 
   if (!email || !name || !password) {
-    return res.status(400).json({ error: 'Missing required fields' });
+    return res.status(400).json({ error: "Missing required fields" });
   }
 
   await mongooseConnect();
-
-  // Generate a new 6-digit verification code
   const code = Math.floor(100000 + Math.random() * 900000).toString();
-
-  // Hash the password securely
   const hashedPassword = await bcrypt.hash(password, 10);
+  const existingCode = await VerificationCode.findOne({ email });
 
-  // Check if the user already exists in the database
-  const existingUser = await VerificationCode.findOne({ email });
-
-  if (existingUser) {
-    // Check if the code is expired (10 minutes expiry)
-    if (Date.now() - existingUser.createdAt.getTime() < 10 * 60 * 1000) {
-      return res.status(400).json({ error: 'Verification code has already been sent recently.' });
+  if (existingCode) {
+    if (Date.now() - existingCode.createdAt.getTime() < 10 * 60 * 1000) {
+      return res.status(400).json({
+        error: "Verification code has already been sent recently.",
+      });
     }
   }
 
-  // Update or create the verification code entry
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    return res.status(400).json({ error: "An account with this email already exists." });
+  }
+
   await VerificationCode.findOneAndUpdate(
     { email },
-    { email, name, password: hashedPassword, code, createdAt: new Date(), expiresAt: Date.now() + 10 * 60 * 1000 }, // expiry time set to 10 minutes
+    {
+      email,
+      name,
+      password: hashedPassword,
+      code,
+      createdAt: new Date(),
+      expiresAt: Date.now() + 10 * 60 * 1000,
+    },
     { upsert: true, new: true }
   );
 
+  const year = new Date().getFullYear();
+  const emailTemplate = `
+  <div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 30px; text-align: center;">
+    <img src="https://2funshops.com/logo.png" alt="Logo" style="width: 150px; margin-bottom: 20px;" />
+    <h2 style="color: #333;">Hello ${name}, please verify your email address!</h2>
+    <p style="font-size: 16px; color: #555;">
+      Thank you for beginning a 2fun.shops account registration. We want to make sure it's really you.
+    </p>
+    <h2 style="color: #000000ff;">Verification code</h2>
+    <div style="background-color: #e0e0e0; display: inline-block; padding: 20px 30px; margin: 20px 0; border-radius: 8px;">
+      <span style="font-size: 28px; letter-spacing: 4px; font-weight: bold;">${code}</span>
+    </div>
+    <p>If you don't want to create the account, you can ignore this email.</p>
+    <p style="font-size: 12px; color: #aaa; margin-top: 30px;">© ${year} All rights reserved</p>
+    <p>2funshops.com</p>
+  </div>
+`;
+
   try {
-  await resend.emails.send({
-    from: '2fun.shops <support@2funshops.com>',
-    to: email,
-    subject: 'Test Email',
-    html: `<p>This is a test email.</p>`,
+    await resend.emails.send({
+      from: "Verification Code <support@2funshops.com>",
+      to: email,
+      subject: `Your 2fun.shops verification code is ${code}`,
+      html:emailTemplate,
   });
-  return res.status(200).json({ message: 'Test email sent successfully.' });
-} catch (err) {
-  console.error('Test email error:', err);
-  return res.status(500).json({ error: 'Failed to send test email.' });
+    return res.status(200).json({ message: "Verification email sent successfully." });
+  } catch (err) {
+    console.error("Email send error:", err?.response?.data || err);
+    return res.status(500).json({ error: "Failed to send verification email." });
+  }
 }
-}
-
-
-// import { Resend } from 'resend';
-// import { VerificationCode } from "@/models/VerificationCode";
-// import { mongooseConnect } from "@/lib/mongoose";
-// import bcrypt from 'bcrypt';
-
-// const resend = new Resend(process.env.RESEND_API_KEY);
-
-// export default async function handler(req, res) {
-//   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-
-//   const { email, name, password } = req.body;
-
-//   if (!email || !name || !password) {
-//     return res.status(400).json({ error: 'Missing required fields' });
-//   }
-
-//   await mongooseConnect();
-
-//   const code = Math.floor(100000 + Math.random() * 900000).toString();
-
-//   // Hash the password before saving
-//   const hashedPassword = await bcrypt.hash(password, 10);
-
-//   // Save to DB
-//   await VerificationCode.findOneAndUpdate(
-//     { email },
-//     { email, name, password: hashedPassword, code, createdAt: new Date() },
-//     { upsert: true }
-//   );
-
-//   try {
-//     await resend.emails.send({
-//       from: 'Your App <onboarding@yourdomain.resend.dev>',
-//       to: email,
-//       subject: 'Your verification code',
-//       html: `<p>Hello ${name},</p><p>Your verification code is: <strong>${code}</strong></p>`,
-//     });
-
-//     return res.status(200).json({ message: 'Verification code sent.' });
-//   } catch (err) {
-//     console.error(err);
-//     return res.status(500).json({ error: 'Failed to send email.' });
-//   }
-// }
