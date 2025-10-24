@@ -106,7 +106,6 @@ export default async function handler(req, res) {
       <p style="font-size: 12px; color: #aaa; margin-top: 30px;">©2023-${year} All rights reserved — 2funshops.com</p>
     </div>
     `;
-y
     await resend.emails.send({
       from: process.env.RESEND_FROM_W,
       to: record.email,
