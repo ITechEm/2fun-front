@@ -84,10 +84,10 @@ export default function ResetPasswordPage() {
 
     const data = await res.json();
     if (res.ok) {
-      setMessage("✅ Password reset! Redirecting to login...");
+      setMessage("Password reset! Redirecting to login...");
       setTimeout(() => router.push("/account"), 2000);
     } else {
-      setMessage(`❌ ${data.error || "Reset failed"}`);
+      setMessage(`${data.error || "Reset failed"}`);
       setError(true);
     }
   };
