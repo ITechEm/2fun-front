@@ -204,7 +204,7 @@ export default function LoginPage() {
     </LinkButton>
   </SmallText>
   <SmallText>
-    Don't have an account?{" "}
+    Don&apos;t have an account?{" "}
     <LinkButton onClick={() => router.push('/register')}>
       Register here
     </LinkButton>
