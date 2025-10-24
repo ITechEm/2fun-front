@@ -64,7 +64,7 @@ export default async function handler(req, res) {
 
         <p style="margin: 16px 0;">
           <strong style="color:#333;">1. Update Your Shipping Address</strong><br />
-          Go to your <a href="https://2funshops.com/profile" style="color:#067df7; text-decoration:none;">Profile</a> and add your shipping address manually.<br />
+          Go to your <a style="color:#067df7; text-decoration:none;">Profile</a> and add your shipping address manually.<br />
           📌 We can’t process your order without a shipping address, so make sure it’s complete!
         </p>
 
@@ -78,7 +78,7 @@ export default async function handler(req, res) {
         <p style="margin: 16px 0;">
           <strong style="color:#333;">3. Personalization</strong><br />
           Once we receive your order, one of our team members will reach out via email, or you can send your 
-          <a href="https://2funshops.com/orders" style="color:#067df7; text-decoration:none;">Order Number</a>
+          <a style="color:#067df7; text-decoration:none;">Order Number</a>
           to discuss any customizations or special requests.<br />
           Don’t worry — we’ll guide you step by step to make sure your order is perfect.
         </p>
@@ -87,7 +87,7 @@ export default async function handler(req, res) {
           <strong style="color:#333;">4. Secure Payment</strong><br />
           After we’ve reviewed your order together, you can complete your payment safely through our secure checkout.<br />
           Once your payment is confirmed, we’ll update you on your 
-          <a href="https://2funshops.com/status" style="color:#067df7; text-decoration:none;">Order Status</a> so you’re always in the loop.
+          <a style="color:#067df7; text-decoration:none;">Order Status</a> so you’re always in the loop.
         </p>
       </div>
 
