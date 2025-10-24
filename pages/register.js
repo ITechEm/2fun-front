@@ -1,7 +1,9 @@
+'use client';
+
 import Layout from "./layout2";
 import Center from "@/components/Center";
 import Button from "@/components/Button";
-import styled, { keyframes } from "styled-components";
+import styled, { keyframes, css } from "styled-components";
 import Input from "@/components/Input";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
@@ -26,11 +28,30 @@ const Title = styled.h2`
   font-family: 'Georgia', serif;
 `;
 
+const shake = keyframes`
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-5px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+  100% { transform: translateX(0); }
+`;
+
 const StyledInput = styled(Input)`
   border-radius: 12px;
   padding: 12px;
   font-size: 16px;
   margin-bottom: 15px;
+  border: 2px solid #ccc;
+  transition: border 0.2s ease-in-out, background 0.2s ease-in-out;
+
+  ${(props) =>
+    props.error &&
+    css`
+      border-color: #e53935;
+      background-color: #ffe6e6;
+      animation: ${shake} 0.3s;
+    `}
 `;
 
 const InputWrapper = styled.div`
@@ -52,6 +73,10 @@ const ShowPasswordButton = styled.button`
   color: #999;
   cursor: pointer;
   font-size: 16px;
+  font-weight: bold;
+  &:hover {
+    color: #333;
+  }
 `;
 
 const StyledButton = styled(Button)`
@@ -62,7 +87,6 @@ const StyledButton = styled(Button)`
   font-weight: bold;
   font-size: 16px;
   margin-top: 15px;
-
   &:hover {
     background-color: #585555ff;
   }
@@ -107,42 +131,63 @@ const ErrorPopup = styled(Popup)`
 `;
 
 export default function RegisterPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [formError, setFormError] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [errorFields, setErrorFields] = useState({});
+  const [formError, setFormError] = useState("");
   const router = useRouter();
 
   const handleRegister = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
+    let newErrors = {};
 
-  if (!name || !email || !password) {
-    setFormError('Toate câmpurile sunt obligatorii.');
-    return;
-  }
+    if (!name.trim()) newErrors.name = true;
+    if (!email.trim() || !email.includes("@")) newErrors.email = true;
+    if (!password || password.length < 6 || password.length > 12) newErrors.password = true;
 
-  if (password.length < 6 || password.length > 12) {
-    setFormError('Parola trebuie să fie între 6 și 12 caractere.');
-    return;
-  }
+    if (Object.keys(newErrors).length > 0) {
+      setErrorFields(newErrors);
 
-  setFormError('');
+      // Set proper form error message
+      if (!name.trim() || !email.trim() || !password) {
+        setFormError("Please fill in all fields");
+      } else if (!email.includes("@")) {
+        setFormError('Please include an "@" in the email');
+      } else if (password.length < 6 || password.length > 12) {
+        setFormError("Password must be between 6 and 12 characters");
+      }
+      setTimeout(() => setErrorFields({}), 500);
+      return;
+    }
 
-  try {
-    
-    await axios.post('/api/send-verification-code', { name, email, password });
+    setErrorFields({});
+    setFormError("");
 
-   
-    router.push(`/verify?email=${encodeURIComponent(email)}`);
-  } catch (error) {
-    setFormError(error.response?.data?.error || 'Error sending verification email');
-  }
-};
+    try {
+      await axios.post("/api/send-verification-code", { name, email, password });
+      router.push(`/verify?email=${encodeURIComponent(email)}`);
+    } catch (error) {
+      setFormError(error.response?.data?.error || "Error sending verification email");
+      setErrorFields({ name: true, email: true, password: true });
+      setTimeout(() => setErrorFields({}), 500);
+    }
+  };
+
+  const handleChange = (field, value) => {
+    if (field === "name") setName(value);
+    if (field === "email") setEmail(value);
+    if (field === "password") setPassword(value);
+
+    if (errorFields[field]) {
+      setErrorFields(prev => ({ ...prev, [field]: false }));
+    }
+  };
 
   useEffect(() => {
     if (formError) {
-      const timer = setTimeout(() => setFormError(''), 3000);
+      const timer = setTimeout(() => setFormError(""), 3000);
       return () => clearTimeout(timer);
     }
   }, [formError]);
@@ -152,144 +197,57 @@ export default function RegisterPage() {
       <Layout>
         <Center>
           <ColsWrapper>
-            <form onSubmit={handleRegister} style={{ width: '100%' }}>
+            <form onSubmit={handleRegister} style={{ width: "100%" }}>
               <Title>Register</Title>
 
               <StyledInput
                 type="text"
                 placeholder="Name"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
+                onChange={(e) => handleChange("name", e.target.value)}
+                error={errorFields.name}
               />
+
               <StyledInput
                 type="email"
                 placeholder="Email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
+                onChange={(e) => handleChange("email", e.target.value)}
+                error={errorFields.email}
               />
 
-             
               <InputWrapper>
                 <PasswordInput
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   placeholder="Password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
+                  onChange={(e) => handleChange("password", e.target.value)}
+                  error={errorFields.password}
                   minLength={6}
                   maxLength={12}
                 />
                 <ShowPasswordButton
                   type="button"
-                  onClick={() => setShowPassword((prev) => !prev)}
+                  onClick={() => setShowPassword(prev => !prev)}
                 >
-                  {showPassword ? 'Hide' : 'Show'}
+                  {showPassword ? "Hide" : "Show"}
                 </ShowPasswordButton>
               </InputWrapper>
 
-              <StyledButton type="submit" block>Create Account</StyledButton>
+              <StyledButton type="submit" block>
+                Create Account
+              </StyledButton>
 
               <SmallText>
-               Do you already have an account?{' '}
-                <LinkButton onClick={() => router.push('/login')}>
-                  Login
-                </LinkButton>
+                Already have an account?{" "}
+                <LinkButton onClick={() => router.push("/login")}>Login</LinkButton>
               </SmallText>
             </form>
           </ColsWrapper>
         </Center>
       </Layout>
+
       {formError && <ErrorPopup>{formError}</ErrorPopup>}
     </>
   );
 }
-
-
-
-
-
-
-// import Header from "@/components/Header";
-// import Center from "@/components/Center";
-// import Button from "@/components/Button";
-// import styled from "styled-components";
-// import WhiteBox from "@/components/WhiteBox";
-// import { RevealWrapper } from "next-reveal";
-// import Input from "@/components/Input";
-// import { useState } from "react";
-// import axios from "axios";
-// import { useRouter } from "next/router";
-
-// const ColsWrapper = styled.div`
-//   display: grid;
-//   grid-template-columns: 1fr;
-//   max-width: 400px;
-//   margin: 40px auto;
-// `;
-
-// export default function RegisterPage() {
-//   const [name, setName] = useState('');
-//   const [email, setEmail] = useState('');
-//   const [password, setPassword] = useState('');
-//   const [formError, setFormError] = useState('');
-//   const router = useRouter();
-
-//   async function handleRegister() {
-//     setFormError('');
-//     try {
-//       await axios.post('/api/register', { name, email, password });
-//       // After registration, redirect to login page
-//       router.push('/login');
-//     } catch (err) {
-//       setFormError(err.response?.data?.error || 'Error registering');
-//     }
-//   }
-
-//   return (
-//     <>
-//       <Header />
-//       <Center>
-//         <ColsWrapper>
-//           <RevealWrapper delay={100}>
-//             <WhiteBox>
-//               <h2>Register</h2>
-//               <Input
-//                 type="email"
-//                 placeholder="Email"
-//                 value={email}
-//                 onChange={ev => setEmail(ev.target.value)}
-//               />
-//               <Input
-//                 type="password"
-//                 placeholder="Password"
-//                 value={password}
-//                 onChange={ev => setPassword(ev.target.value)}
-//               />
-//               {formError && (
-//                 <p style={{ color: 'red', marginTop: 10 }}>{formError}</p>
-//               )}
-//               <Button primary block onClick={handleRegister}>Register</Button>
-//               <p style={{ marginTop: 10 }}>
-//                 Already have an account?{" "}
-//                 <button
-//                   onClick={() => router.push('/login')}
-//                   style={{
-//                     textDecoration: 'underline',
-//                     background: 'none',
-//                     border: 0,
-//                     color: 'blue',
-//                     cursor: 'pointer',
-//                   }}
-//                 >
-//                   Login here
-//                 </button>
-//               </p>
-//             </WhiteBox>
-//           </RevealWrapper>
-//         </ColsWrapper>
-//       </Center>
-//     </>
-//   );
-// }

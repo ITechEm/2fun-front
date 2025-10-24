@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import styled, { keyframes } from 'styled-components';
+import styled, { keyframes, css } from 'styled-components';
 import Layout from './layout2';
 import Center from '@/components/Center';
 import Input from '@/components/Input';
@@ -26,11 +26,35 @@ const Title = styled.h2`
   margin-bottom: 30px;
 `;
 
+const shake = keyframes`
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-5px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+  100% { transform: translateX(0); }
+`;
+
 const StyledInput = styled(Input)`
   border-radius: 12px;
   padding: 12px;
   font-size: 16px;
   width: 100%;
+  border: 2px solid #ccc;
+  margin-bottom: 15px;
+  transition: border 0.2s;
+
+  ${(props) =>
+    props.hasError &&
+    css`
+      border-color: #e53935;
+      animation: ${shake} 0.3s;
+    `}
+
+  &:focus {
+    outline: none;
+    border-color: ${(props) => (props.hasError ? '#e53935' : '#1f1f1f')};
+  }
 `;
 
 const StyledButton = styled(Button)`
@@ -62,7 +86,7 @@ const Popup = styled.div`
   padding: 12px 20px;
   border-radius: 10px;
   font-size: 14px;
-  z-index: 1000;
+  z-index: 10000;
   animation: ${fadeIn} 0.3s ease-in-out;
   box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 `;
@@ -81,16 +105,19 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [countdown, setCountdown] = useState(0);
+  const [emailError, setEmailError] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setMessage('');
-    setCountdown(0);
+    setError('');
+    setEmailError(false);
 
-    if (!email) return setError('Please enter your email');
+    if (!email.trim()) {
+      setEmailError(true);
+      return setError('Email is required');
+    }
 
     try {
       const res = await fetch('/api/request-reset', {
@@ -102,10 +129,6 @@ export default function ForgotPasswordPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        if (data.error?.includes('You can request another')) {
-          const match = data.error.match(/(\d+) seconds/);
-          if (match) setCountdown(parseInt(match[1], 10));
-        }
         setError(data.error || 'Something went wrong. Try again later.');
       } else {
         setMessage(data.message);
@@ -120,21 +143,12 @@ export default function ForgotPasswordPage() {
       const timer = setTimeout(() => {
         setMessage('');
         setError('');
+        setEmailError(false);
         if (message) router.push('/account');
-      }, 5000);
+      }, 3000);
       return () => clearTimeout(timer);
     }
   }, [message, error, router]);
-
-  useEffect(() => {
-    let interval;
-    if (countdown > 0) {
-      interval = setInterval(() => {
-        setCountdown((prev) => (prev > 0 ? prev - 1 : 0));
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [countdown]);
 
   return (
     <Layout>
@@ -142,27 +156,19 @@ export default function ForgotPasswordPage() {
         <ColsWrapper>
           <form onSubmit={handleSubmit} style={{ width: '100%' }}>
             <Title>Forgot Password</Title>
-
             <StyledInput
               type="email"
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
+              hasError={emailError}
             />
-
             <StyledButton type="submit">Reset Password</StyledButton>
           </form>
         </ColsWrapper>
       </Center>
-
       {message && <SuccessPopup>{message}</SuccessPopup>}
-      {error && (
-        <ErrorPopup>
-          {error}
-          {countdown > 0 && ` (${countdown}s)`}
-        </ErrorPopup>
-      )}
+      {error && <ErrorPopup>{error}</ErrorPopup>}
     </Layout>
   );
 }

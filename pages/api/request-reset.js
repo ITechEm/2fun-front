@@ -11,7 +11,7 @@ export default async function handler(req, res) {
 
   const user = await User.findOne({ email });
   if (!user) {
-    return res.status(200).json({ message: "If email exists, reset link sent." });
+    return res.status(200).json({ message: "No user found, redirecting to the Login page" });
   }
 
   const now = new Date();
@@ -19,7 +19,7 @@ export default async function handler(req, res) {
   if (user.lastResetRequest && now - user.lastResetRequest < 5 * 60 * 1000) {
     const remainingSeconds = Math.ceil((5 * 60 * 1000 - (now - user.lastResetRequest)) / 1000);
     return res.status(429).json({
-      error: `You can request another password reset in ${remainingSeconds} seconds.`,
+      error: `You can request another password reset in 5 min (${remainingSeconds}-seconds remaining)`,
     });
   }
 
@@ -51,7 +51,7 @@ export default async function handler(req, res) {
 
   try {
     await resend.emails.send({
-      from: "Reset Password <support@2funshops.com>",
+      from: process.env.RESEND_FROM_RP,
       to: email,
       subject: "Your 2fun.shops reset password link",
       html: emailTemplate,

@@ -68,7 +68,7 @@ export default async function handler(req, res) {
 
   try {
     await resend.emails.send({
-      from: "Verification Code <support@2funshops.com>",
+      from: process.env.RESEND_FROM_CODE,
       to: email,
       subject: `Your 2fun.shops verification code`,
       html:emailTemplate,
