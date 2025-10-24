@@ -149,8 +149,6 @@ export default function RegisterPage() {
 
     if (Object.keys(newErrors).length > 0) {
       setErrorFields(newErrors);
-
-      // Set proper form error message
       if (!name.trim() || !email.trim() || !password) {
         setFormError("Please fill in all fields");
       } else if (!email.includes("@")) {

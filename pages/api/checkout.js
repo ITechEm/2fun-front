@@ -20,8 +20,6 @@ export default async function handler(req, res) {
     const { name, email, city, phone, postalCode, streetAddress, country, cartProducts } = req.body;
 
     await mongooseConnect();
-
-    // Fetch products from DB to build line_items
     const uniqueIds = [...new Set(cartProducts)];
     const productsInfos = await Product.find({ _id: uniqueIds });
 

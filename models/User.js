@@ -19,9 +19,6 @@ UserSchema.pre("save", async function (next) {
 
 export const User = mongoose.models.User || mongoose.model("User", UserSchema);
 
-
-
-
 // import mongoose from "mongoose";
 
 // const UserSchema = new mongoose.Schema({

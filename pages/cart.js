@@ -149,22 +149,22 @@ export default function CartPage() {
   }
 
   function goToProfile() {
-    router.push('/profile');  // Redirect to profile page
+    router.push('/profile');
   }
 
   useEffect(() => {
     if (cartProducts.length > 0) {
       axios.post('/api/cart', { ids: cartProducts })
         .then(response => {
-          console.log("Fetched products:", response.data);  // Check fetched data
+          console.log("Fetched products:", response.data);
           setProducts(response.data);
         })
         .catch(error => {
           console.error("Error fetching cart products:", error);
-          setProducts([]);  // Clear products in case of an error
+          setProducts([]);
         });
     } else {
-      setProducts([]);  // Ensure products are cleared if cart is empty
+      setProducts([]);
     }
   }, [cartProducts]);
 
@@ -214,7 +214,6 @@ useEffect(() => {
     return;
   }
 
-  // Validate shipping fields before sending data
   if (!name || !email || !phone || !streetAddress || !city || !postalCode || !country) {
     setPopupMessage("Please complete your shipping address before placing an order.");
     return;
@@ -247,12 +246,9 @@ useEffect(() => {
   }
 }
 
-
-
-  // Updated product total calculation with checks for missing product data
   let productsTotal = 0;
   for (const productId of cartProducts) {
-    const product = products.find(p => p._id === productId); // Find product by ID
+    const product = products.find(p => p._id === productId);
     if (product) {
       productsTotal += product.price * cartProducts.filter(id => id === productId).length;
     }

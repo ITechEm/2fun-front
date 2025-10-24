@@ -9,10 +9,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Connect to DB
     await mongooseConnect();
-
-    // Get session and check
     const session = await getServerSession(req, res, authOptions);
     if (!session?.user?.email) {
       console.log('No session or user email found.');
@@ -22,9 +19,7 @@ export default async function handler(req, res) {
     const email = session.user.email;
     console.log('Attempting to delete user:', email);
 
-    // Delete user by email
     const result = await User.deleteOne({ email });
-
     console.log('Delete result:', result);
 
     if (result.deletedCount === 0) {

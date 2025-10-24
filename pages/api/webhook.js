@@ -17,8 +17,6 @@ export default async function handler(req,res) {
     res.status(400).send(`Webhook Error: ${err.message}`);
     return;
   }
-
-  // Handle the event
   switch (event.type) {
     case 'checkout.session.completed':
       const data = event.data.object;

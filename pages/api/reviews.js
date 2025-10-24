@@ -1,7 +1,6 @@
-// api/reviews.js
 import { mongooseConnect } from "@/lib/mongoose";
 import { Review } from "@/models/Review";
-import { getSession } from "next-auth/react"; // for session management
+import { getSession } from "next-auth/react";
 
 export default async function handle(req, res) {
   await mongooseConnect();
@@ -24,7 +23,7 @@ export default async function handle(req, res) {
         description,
         stars,
         product,
-        user: session.user.id, // Link the review to the user
+        user: session.user.id,
       });
       return res.status(201).json(newReview);
     } catch (error) {
@@ -37,8 +36,8 @@ export default async function handle(req, res) {
     
     try {
       const reviews = await Review.find({ product })
-        .populate("user", "name") // Populate the user with their name only
-        .sort({ createdAt: -1 }); // Sort reviews by creation date
+        .populate("user", "name")
+        .sort({ createdAt: -1 });
       
       return res.status(200).json(reviews);
     } catch (error) {

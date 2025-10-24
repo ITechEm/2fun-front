@@ -26,10 +26,10 @@ export default async function handler(req, res) {
     }
 
     let shippingFee = 0;
-    if (totalWeight <= 2) shippingFee = 4;      // Light package
-    else if (totalWeight <= 5) shippingFee = 7; // Medium
-    else if (totalWeight <= 10) shippingFee = 12; // Heavy
-    else shippingFee = 25;                       // Very heavy
+    if (totalWeight <= 2) shippingFee = 4;      
+    else if (totalWeight <= 5) shippingFee = 7;
+    else if (totalWeight <= 10) shippingFee = 12;
+    else shippingFee = 25;
 
     res.json({ shippingFee, totalWeight });
   } catch (error) {

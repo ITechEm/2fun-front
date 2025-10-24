@@ -15,14 +15,12 @@ export default async function handler(req, res) {
     }
 
     await mongooseConnect();
-
-    // Check if user already exists
+    
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ error: 'Email already in use' });
     }
 
-    // Create the user
     const user = await User.create({ name, email, password });
     const safeUser = user.toObject();
     delete safeUser.password;

@@ -142,14 +142,8 @@ const OrderDetailsPage = () => {
       .get(`/api/orders/${orderId}`)
       .then((res) => {
         console.log("Fetched updated order:", res.data);
-        
-        // Set order details
         setOrder(res.data);
-        
-        // Set shipping address from the order data directly
         setShippingAddress(res.data.shippingAddress);
-
-        // Set payment status (useful if it's not in the `order` object)
         setIsPaid(res.data.paid === true);
 
         setIsLoading(false);
@@ -160,7 +154,7 @@ const OrderDetailsPage = () => {
         setIsLoading(false);
       });
   }
-}, [orderId]); // Trigger this effect only when orderId changes, and avoid using `order?.isApproved` in the dependencies
+}, [orderId]);
 useEffect(() => {
     if (orderId) {
       axios
@@ -244,7 +238,6 @@ useEffect(() => {
     setError(null);
 
     try {
-      // Create cartProducts array of product IDs (or fallback to product names if id missing)
       const cartProducts = order.line_items.flatMap((item) =>
         Array(item.quantity).fill(
           item.price_data.product_data._id || item.price_data.product_data.name

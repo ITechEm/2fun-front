@@ -51,7 +51,6 @@ export default async function handler(req, res) {
 
     await VerificationCode.deleteOne({ email });
 
-    // Welcome email
     const year = new Date().getFullYear();
     const emailTemplate = `
     <div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 30px; text-align: center;">
@@ -107,16 +106,15 @@ export default async function handler(req, res) {
       <p style="font-size: 12px; color: #aaa; margin-top: 30px;">©2023-${year} All rights reserved — 2funshops.com</p>
     </div>
     `;
-
-    // Wait for email to send successfully
+y
     await resend.emails.send({
       from: process.env.RESEND_FROM_W,
       to: record.email,
-      subject: "Welcome to 2fun.shops!",
+      subject: "Your 2fun.shops guide: Update, Personalize, and Shop!",
       html: emailTemplate,
     });
 
-    console.log("✅ Welcome email sent to", record.email);
+    console.log("Welcome email sent to", record.email);
 
     return res.status(200).json({ message: "Account verified and welcome email sent successfully.", user });
 

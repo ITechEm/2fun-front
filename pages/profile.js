@@ -470,7 +470,7 @@ useEffect(() => {
       <ConfirmModal
   visible={confirmModal.visible}
   type={confirmModal.type}
-  onConfirmDelete={confirmDelete}   // ✅ Make sure this is passed
+  onConfirmDelete={confirmDelete}
   onCancel={() => setConfirmModal({ visible: false, type: null })}
 />
 
