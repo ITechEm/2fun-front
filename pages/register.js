@@ -189,12 +189,12 @@ export default function RegisterPage() {
                 </ShowPasswordButton>
               </InputWrapper>
 
-              <StyledButton type="submit" block>Inregistreaza-te</StyledButton>
+              <StyledButton type="submit" block>Create Account</StyledButton>
 
               <SmallText>
-                Ai deja cont?{' '}
+               Do you already have an account?{' '}
                 <LinkButton onClick={() => router.push('/login')}>
-                  Intră în cont
+                  Login
                 </LinkButton>
               </SmallText>
             </form>
