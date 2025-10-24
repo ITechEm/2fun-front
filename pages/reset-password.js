@@ -22,6 +22,7 @@ const ColsWrapper = styled.div`
 
 const Title = styled.h2`
   font-size: 32px;
+  font-family: 'Georgia', serif;
   text-align: center;
   margin-bottom: 30px;
   color: #1f1f1f;

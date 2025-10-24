@@ -9,7 +9,7 @@ import FlyingButton from "@/components/FlyingButton";
 import HeartOutlineIcon from "@/components/icons/HeartOutlineIcon";
 import HeartSolidIcon from "@/components/icons/HeartSolidIcon";
 import axios from "axios";
-import { useSession } from "next-auth/react"; // Import useSession to manage login state
+import { useSession } from "next-auth/react"; 
 
 const ProductWrapper = styled.div`
   button {

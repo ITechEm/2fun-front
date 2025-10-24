@@ -24,6 +24,7 @@ const Title = styled.h2`
   font-size: 28px;
   text-align: center;
   margin-bottom: 30px;
+  font-family: 'Georgia', serif;
 `;
 
 const shake = keyframes`

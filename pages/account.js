@@ -21,7 +21,6 @@ export default function AccountPage() {
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      // Redirect to login if not logged in
       router.push("/login");
     }
   }, [status, router]);
@@ -31,7 +30,7 @@ export default function AccountPage() {
   }
 
   if (!session) {
-    return null; // or a loading spinner, since redirect happens above
+    return null; 
   }
 
   return (
