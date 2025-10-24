@@ -129,11 +129,11 @@ export default function VerifyPage() {
         { email, code },
         { headers: { "Content-Type": "application/json" } }
       );
-      setSuccess("✅ Account verified. Redirecting...");
+      setSuccess("Account verified. Redirecting...");
       localStorage.removeItem("pendingEmail");
       setTimeout(() => router.push("/login"), 2000);
     } catch (err) {
-      setError(err.response?.data?.error || "❌ Invalid code");
+      setError(err.response?.data?.error || "Invalid code");
     }
   };
 

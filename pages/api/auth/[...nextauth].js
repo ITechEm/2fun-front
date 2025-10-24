@@ -36,7 +36,7 @@ export const authOptions = {
     },
   },
   pages: {
-    signIn: "/account", // or create a separate login page if needed
+    signIn: "/account",
   }
 };
 

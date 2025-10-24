@@ -169,42 +169,48 @@ export default function LoginPage() {
       <Center>
         <ColsWrapper>
           <form onSubmit={handleLogin} style={{ width: '100%' }}>
-            <Title>Login</Title>
+  <Title>Login</Title>
 
-            <StyledInput
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={ev => setEmail(ev.target.value)}
-              required
-            />
-            <InputWrapper>
-                <PasswordInput
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                  maxLength={12}
-                />
-                <ShowPasswordButton
-                  type="button"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                >
-                  {showPassword ? 'Hide' : 'Show'}
-                </ShowPasswordButton>
-              </InputWrapper>
+  <StyledInput
+    type="email"
+    placeholder="Email"
+    value={email}
+    onChange={ev => setEmail(ev.target.value)}
+    required
+  />
 
-            <StyledButton type="submit" block>Login</StyledButton>
+  <InputWrapper>
+    <PasswordInput
+      type={showPassword ? 'text' : 'password'}
+      placeholder="Password"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      required
+      minLength={6}
+      maxLength={12}
+    />
+    <ShowPasswordButton
+      type="button"
+      onClick={() => setShowPassword((prev) => !prev)}
+    >
+      {showPassword ? 'Hide' : 'Show'}
+    </ShowPasswordButton>
+  </InputWrapper>
 
-            <SmallText>
-              Nu ai cont?{" "}
-              <LinkButton onClick={() => router.push('/register')}>
-                Înregistrează-te aici.
-              </LinkButton>
-            </SmallText>
-          </form>
+  <StyledButton type="submit" block>Login</StyledButton>
+   <SmallText>
+    <LinkButton onClick={() => router.push('/forgot-password')}>
+      Forgot Password?
+    </LinkButton>
+  </SmallText>
+  <SmallText>
+    Don't have an account?{" "}
+    <LinkButton onClick={() => router.push('/register')}>
+      Register here
+    </LinkButton>
+  </SmallText>
+ 
+</form>
         </ColsWrapper>
       </Center>
 </Layout>
@@ -212,97 +218,3 @@ export default function LoginPage() {
     </>
   );
 }
-
-
-
-// import Header from "@/components/Header";
-// import Center from "@/components/Center";
-// import { signIn, useSession } from "next-auth/react";
-// import Button from "@/components/Button";
-// import styled from "styled-components";
-// import WhiteBox from "@/components/WhiteBox";
-// import { RevealWrapper } from "next-reveal";
-// import Input from "@/components/Input";
-// import { useState, useEffect } from "react";
-// import { useRouter } from "next/router";
-
-// const ColsWrapper = styled.div`
-//   display: grid;
-//   grid-template-columns: 1fr;
-//   max-width: 400px;
-//   margin: 40px auto;
-// `;
-
-// export default function LoginPage() {
-//   const { data: session } = useSession();
-//   const [email, setEmail] = useState('');
-//   const [password, setPassword] = useState('');
-//   const [formError, setFormError] = useState('');
-//   const router = useRouter();
-
-//   useEffect(() => {
-//     if (session) {
-//       router.push('/'); // Redirect if already logged in
-//     }
-//   }, [session, router]);
-
-//   async function handleLogin() {
-//     setFormError('');
-//     const res = await signIn('credentials', {
-//       email,
-//       password,
-//       redirect: false,
-//     });
-//     if (!res.error) {
-//       router.push('/');
-//     } else {
-//       setFormError(res.error);
-//     }
-//   }
-
-//   return (
-//     <>
-//       <Header />
-//       <Center>
-//         <ColsWrapper>
-//           <RevealWrapper delay={100}>
-//             <WhiteBox>
-//               <h2>Login</h2>
-//               <Input
-//                 type="email"
-//                 placeholder="Email"
-//                 value={email}
-//                 onChange={ev => setEmail(ev.target.value)}
-//               />
-//               <Input
-//                 type="password"
-//                 placeholder="Password"
-//                 value={password}
-//                 onChange={ev => setPassword(ev.target.value)}
-//               />
-//               {formError && (
-//                 <p style={{ color: 'red', marginTop: 10 }}>{formError}</p>
-//               )}
-//               <Button primary block onClick={handleLogin}>Login</Button>
-//               <p style={{ marginTop: 10 }}>
-//                 Don't have an account?{" "}
-//                 <button
-//                   onClick={() => router.push('/register')}
-//                   style={{
-//                     textDecoration: 'underline',
-//                     background: 'none',
-//                     border: 0,
-//                     color: 'blue',
-//                     cursor: 'pointer',
-//                   }}
-//                 >
-//                   Register here
-//                 </button>
-//               </p>
-//             </WhiteBox>
-//           </RevealWrapper>
-//         </ColsWrapper>
-//       </Center>
-//     </>
-//   );
-// }

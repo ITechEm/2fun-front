@@ -62,8 +62,7 @@ export default async function handler(req, res) {
       <span style="font-size: 28px; letter-spacing: 4px; font-weight: bold;">${code}</span>
     </div>
     <p>If you don't want to create the account, you can ignore this email.</p>
-    <p style="font-size: 12px; color: #aaa; margin-top: 30px;">© ${year} All rights reserved</p>
-    <p>2funshops.com</p>
+    <p style="font-size: 12px; color: #aaa; margin-top: 30px;">©2023-${year} All rights reserved — 2funshops.com</p>
   </div>
 `;
 
@@ -71,10 +70,10 @@ export default async function handler(req, res) {
     await resend.emails.send({
       from: "Verification Code <support@2funshops.com>",
       to: email,
-      subject: `Your 2fun.shops verification code is ${code}`,
+      subject: `Your 2fun.shops verification code`,
       html:emailTemplate,
   });
-    return res.status(200).json({ message: "Verification email sent successfully." });
+    return res.status(200).json({ message: "Verification email sent successfully."});
   } catch (err) {
     console.error("Email send error:", err?.response?.data || err);
     return res.status(500).json({ error: "Failed to send verification email." });
