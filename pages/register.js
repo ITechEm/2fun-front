@@ -202,7 +202,7 @@ export default function RegisterPage() {
 
               <StyledInput
                 type="text"
-                placeholder="Name"
+                placeholder="Full Name"
                 value={name}
                 onChange={(e) => handleChange("name", e.target.value)}
                 error={errorFields.name}

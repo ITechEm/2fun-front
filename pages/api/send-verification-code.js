@@ -55,13 +55,17 @@ export default async function handler(req, res) {
     <img src="https://2funshops.com/logo.png" alt="Logo" style="width: 150px; margin-bottom: 20px;" />
     <h2 style="color: #333;">Hello ${name}, please verify your email address!</h2>
     <p style="font-size: 16px; color: #555;">
-      Thank you for beginning a 2fun.shops account registration. We want to make sure it's really you.
+      Thank you for beginning a 2fun.shops account registration.
+    </p></br>
+    <p style="font-size: 16px; color: #555;">
+     We want to make sure it's really you.
     </p>
     <h2 style="color: #000000ff;">Verification code</h2>
     <div style="background-color: #e0e0e0; display: inline-block; padding: 20px 30px; margin: 20px 0; border-radius: 8px;">
       <span style="font-size: 28px; letter-spacing: 4px; font-weight: bold;">${code}</span>
     </div>
     <p>If you don't want to create the account, you can ignore this email.</p>
+    <div style="width:100%; max-width:600px; border-top:1px solid #cccccc; margin:20px auto;"></div>
     <p style="font-size: 12px; color: #aaa; margin-top: 30px;">©2023-${year} All rights reserved — 2funshops.com</p>
   </div>
 `;

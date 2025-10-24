@@ -45,6 +45,7 @@ export default async function handler(req, res) {
        Reset Password
     </a>
     <p style="margin-top: 20px; font-size: 13px;">If you didn’t request this, please ignore this email.</p>
+    <div style="width:100%; max-width:600px; border-top:1px solid #cccccc; margin:20px auto;"></div>
     <p style="font-size: 12px; color: #aaa; margin-top: 10px;">©2023-${year} All rights reserved — 2funshops.com</p>
   </div>
 `;
