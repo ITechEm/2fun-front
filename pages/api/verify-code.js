@@ -91,15 +91,15 @@ export default async function handler(req, res) {
         </p>
       </div>
 
-      <h3 style="margin-top: 30px; color:#333;">✨ We’re excited to help make your 2fun.shops experience amazing!</h3>
+      <h3 style="margin-top: 10px; color:#333;">✨ We’re excited to help make your 2fun.shops experience amazing!</h3>
 
       <a href="https://2funshops.com"
         style="display:inline-block; margin-top: 20px; padding: 12px 25px; background:#1f1f1f; color:white; border-radius:8px; text-decoration:none; font-size:16px;">
         Go to 2fun.shops
       </a>
 
-      <p style="font-size:16px; line-height:26px; color:#555; text-align:left; max-width:600px; margin: 0 auto;">
-        Best,<br />The 2fun.shops Team
+      <p style="font-size:14px; line-height:26px; color:#555; text-align:left; max-width:600px; margin: 0 auto; margin-top: 30px;">
+        Put the love in handmade,<br />the 2fun.shops Team! 💛
       </p>
 
       <div style="max-width:600px; margin:30px auto; border-top:1px solid #cccccc;"></div>
