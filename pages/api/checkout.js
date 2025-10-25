@@ -1,196 +1,138 @@
 import { mongooseConnect } from "@/lib/mongoose";
-import { Product } from "@/models/Product";
-import { Order } from "@/models/Order";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
-import { Setting } from "@/models/Setting";
-const stripe = require('stripe')(process.env.STRIPE_SK);
+import { Order } from "@/models/Order";
+import { Resend } from "resend";
+import { Product } from "@/models/Product"; // <-- if needed to fetch product data
 
-function generateOrderNumber() {
-  const randomNum = Math.floor(10000 + Math.random() * 90000);
-  return `ORDER-${randomNum}`;
-}
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+  await mongooseConnect();
+  const { user } = await getServerSession(req, res, authOptions);
+  if (!user) return res.status(401).json({ message: "Unauthorized" });
+
+  if (req.method !== "POST") {
+    return res.status(405).json({ message: `Method ${req.method} Not Allowed` });
   }
 
   try {
     const { name, email, city, phone, postalCode, streetAddress, country, cartProducts } = req.body;
 
-    await mongooseConnect();
+    if (!cartProducts?.length) {
+      return res.status(400).json({ message: "No products in cart" });
+    }
+
+    // --- Fetch product info to build line_items ---
     const uniqueIds = [...new Set(cartProducts)];
-    const productsInfos = await Product.find({ _id: uniqueIds });
+    const productDocs = await Product.find({ _id: uniqueIds });
 
-    let line_items = [];
-    for (const productId of uniqueIds) {
-      const productInfo = productsInfos.find(p => p._id.toString() === productId);
-      const quantity = cartProducts.filter(id => id === productId).length || 0;
-      if (quantity > 0 && productInfo) {
-        line_items.push({
-          quantity,
-          price_data: {
-            currency: 'EUR',
-            product_data: { name: productInfo.title },
-            unit_amount: Math.round(productInfo.price * 100),
-          },
-        });
-      }
-    }
+    const line_items = productDocs.map(prod => ({
+      name: prod.title,
+      quantity: cartProducts.filter(id => id === prod._id.toString()).length,
+      price: prod.price,
+    }));
+    const randomNum = Math.floor(10000 + Math.random() * 90000);
+    const orderNumber = `ORDER-${randomNum}`;
 
-    if (line_items.length === 0) {
-      return res.status(400).json({ error: 'Cart is empty' });
-    }
-
-    const session = await getServerSession(req, res, authOptions);
-
-    const orderNumber = generateOrderNumber();
-
-const orderDoc = await Order.create({
-  orderNumber,
-  line_items,
-  name,
-  email,
-  phone,
-  streetAddress,
-  city,
-  postalCode,
-  country,
-  paid: false,
-  userEmail: session?.user?.email,
-});
-
-    const shippingFeeSetting = await Setting.findOne({ name: 'shippingFee' });
-    const shippingFeeCents = Number(shippingFeeSetting?.value ?? 0) * 100;
-
-    const stripeSession = await stripe.checkout.sessions.create({
+    const newOrder = await Order.create({
+      userEmail: user.email,
+      orderNumber,
+      status: "Pending",
       line_items,
-      mode: 'payment',
-      customer_email: email,
-      success_url: (process.env.PUBLIC_URL || 'http://localhost:3001') + '/cart?success=1',
-      cancel_url: (process.env.PUBLIC_URL || 'http://localhost:3001') + '/cart?canceled=1',
-      metadata: { orderId: orderDoc._id.toString() },
-      allow_promotion_codes: true,
-      shipping_options: [
-        {
-          shipping_rate_data: {
-            display_name: 'shipping fee',
-            type: 'fixed_amount',
-            fixed_amount: { amount: shippingFeeCents, currency: 'EUR' },
-          },
-        },
-      ],
+      name,
+      email,
+      city,
+      postalCode,
+      country,
+      streetAddress,
+      phone,
+      createdAt: new Date(),
     });
 
-    res.json({ 
-  url: stripeSession.url,
-  orderNumber: orderDoc.orderNumber,
-});
+    const year = new Date().getFullYear();
+    const itemsHtml = line_items.map((item, index) => `
+  <li
+    style="
+      margin-bottom:10px;
+      list-style:none;
+      ${index < line_items.length - 1 ? 'border-bottom:1px solid #eee;' : ''}
+      padding:5px 0;
+    "
+  >
+    <table style="width:100%; border-collapse:collapse;">
+      <tr>
+        <td style="width:60%; text-align:left; font-weight:bold; color:#333;">${item.name}</td>
+        <td style="width:20%; text-align:center; color:#555;">Qty: ${item.quantity}</td>
+        <td style="width:20%; text-align:right; color:#333;">€${item.price}</td>
+      </tr>
+    </table>
+  </li>
+`).join('');
+
+    const emailHtml = `
+    <div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 30px; text-align: center;">
+  <img src="https://2funshops.com/logo.png" alt="Logo" style="width:150px; margin-bottom:20px;" />
+  
+  <h2 style="color:#333;">Thanks for your order, ${name}! 🎉</h2>
+  <div style="max-width:600px; margin:30px auto;">
+    <div style="position: relative; height: 6px; background: #ddd; border-radius: 3px;">
+      <div style="position: absolute; height: 6px; background: #4caf50; width: 25%; border-radius: 3px;"></div>
+    </div>
+    <div style="display:flex; justify-content:space-between; font-size:13px; color:#777; margin-top:18px;">
+    <div style="width:25%; text-align:center;">Ordered</div>
+    <div style="width:25%; text-align:center;">In review</div>
+    <div style="width:25%; text-align:center;">Out for delivery</div>
+    <div style="width:25%; text-align:center;">Delivered</div>
+  </div>
+  </div>
+  <div style="background:#fff; max-width:600px; margin:0 auto; text-align:left; border:1px solid #eee; border-radius:8px; padding:20px;">
+    <h4 style="color:#333; text-align:center;">Your order has been received and is being reviewed.</h4>
+
+    <p style="color:#333; margin-bottom:10px;"><strong>Order Number:</strong> <span style="color:#777;">${orderNumber}</span></p>
+    <p style="color:#333; font-weight: bold">${name} – ${city}</p>
+
+    <p style="color:#333; margin-bottom:10px;"><strong>Items:</strong></p>
+    <div style="color:#777; margin-bottom: 20px">${itemsHtml}</div>
+
+    <div style="max-width:600px; margin:10px auto; border-top:1px solid #cccccc;"></div>
+
+    <div style="font-size:14px; color:#333; font-weight:bold; margin-top:10px;">
+  <table style="width:100%; border-collapse:collapse;">
+    <tr>
+      <td style="text-align:left;">Total:</td>
+      <td style="text-align:right;">€${line_items.reduce((sum, i) => sum + i.price * i.quantity, 0)}</td>
+    </tr>
+  </table>
+</div>
+
+    <div style="max-width:600px; margin:10px auto; border-top:1px solid #cccccc;"></div>
+
+    <div style="text-align:center; margin-top:20px;">
+      <p style="margin-top:20px;">We’ll email you once your order is approved.</p>
+      <a href="https://2funshops.com/orders" style="display:inline-block; margin-top:10px; padding:12px 25px; background:#1f1f1f; color:white; border-radius:8px; text-decoration:none; font-size:16px;">
+        View Your Orders
+      </a>
+      <p style="font-size: 12px; color: #aaa; margin-top: 30px;">©2023-${year} All rights reserved — <a href="https://2funshops.com" style="color:#777; text-decoration:none;">2funshops.com</a></p>
+    </div>
+  </div>
+</div>`;
+
+    try {
+      await resend.emails.send({
+        from: process.env.RESEND_FROM_O,
+        to: [email, process.env.ORDER_REVIEW],
+        subject: `Order Confirmation — ${orderNumber}`,
+        html: emailHtml,
+      });
+      console.log(`Order confirmation sent to ${email}`);
+    } catch (err) {
+      console.error("Email send error:", err?.response?.data || err);
+    }
+
+    return res.status(201).json({ orderNumber });
   } catch (error) {
-    console.error('Checkout error:', error);
-    res.status(500).json({ error: error.message || 'Internal Server Error' });
+    console.error("Checkout error:", error);
+    return res.status(500).json({ message: "Error creating order", error: error.message });
   }
 }
-
-
-// import { mongooseConnect } from "@/lib/mongoose";
-// import { Product } from "@/models/Product";
-// import { Order } from "@/models/Order";
-// import { getServerSession } from "next-auth";
-// import { authOptions } from "@/pages/api/auth/[...nextauth]";
-// import { Setting } from "@/models/Setting";
-// const stripe = require('stripe')(process.env.STRIPE_SK);
-
-// export default async function handler(req, res) {
-//   if (req.method !== 'POST') {
-//     return res.status(405).json({ error: 'Method not allowed' });
-//   }
-
-//   try {
-//     const {
-//       name, email, city, phone,
-//       postalCode, streetAddress, country,
-//       cartProducts,
-//     } = req.body;
-
-//     if (!Array.isArray(cartProducts) || cartProducts.length === 0) {
-//       return res.status(400).json({ error: 'Cart is empty or invalid' });
-//     }
-
-//     await mongooseConnect();
-
-//     const uniqueIds = [...new Set(cartProducts)];
-//     console.log('Unique product IDs:', uniqueIds);
-
-//     const productsInfos = await Product.find({ _id: uniqueIds });
-//     console.log('Products from DB:', productsInfos);
-
-//     let line_items = [];
-//     for (const productId of uniqueIds) {
-//       const productInfo = productsInfos.find(p => p._id.toString() === productId);
-//       const quantity = cartProducts.filter(id => id === productId).length;
-//       if (quantity > 0 && productInfo) {
-//         line_items.push({
-//           quantity,
-//           price_data: {
-//             currency: 'USD',
-//             product_data: { name: productInfo.title },
-//             unit_amount: productInfo.price * 100, // cents per unit
-//           },
-//         });
-//       }
-//     }
-//     console.log('Line items:', line_items);
-
-//     if (line_items.length === 0) {
-//       return res.status(400).json({ error: 'No valid products found in cart' });
-//     }
-
-//     const session = await getServerSession(req, res, authOptions);
-//     console.log('User session:', session);
-
-//     const orderDoc = await Order.create({
-//       line_items,
-//       name,
-//       email,
-//       phone,
-//       streetAddress,
-//       city,
-//       postalCode,
-//       country,
-//       paid: false,
-//       userEmail: session?.user?.email,
-//     });
-
-//     const shippingFeeSetting = await Setting.findOne({ name: 'shippingFee' });
-//     const shippingFeeCents = Number(shippingFeeSetting?.value ?? 0) * 100;
-//     console.log('Shipping fee cents:', shippingFeeCents);
-
-//     const stripeSession = await stripe.checkout.sessions.create({
-//       line_items,
-//       mode: 'payment',
-//       customer_email: email,
-//       success_url: (process.env.PUBLIC_URL || '') + '/cart?success=1',
-//       cancel_url: (process.env.PUBLIC_URL || '') + '/cart?canceled=1',
-//       metadata: { orderId: orderDoc._id.toString() },
-//       allow_promotion_codes: true,
-//       shipping_options: [
-//         {
-//           shipping_rate_data: {
-//             display_name: 'shipping fee',
-//             type: 'fixed_amount',
-//             fixed_amount: { amount: shippingFeeCents, currency: 'USD' },
-//           },
-//         },
-//       ],
-//     });
-
-//     res.json({ url: stripeSession.url });
-
-//   } catch (error) {
-//     console.error('Checkout error:', error);
-//     res.status(500).json({ error: error.message || 'Internal Server Error' });
-//   }
-// }
-
