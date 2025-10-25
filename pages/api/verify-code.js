@@ -107,7 +107,7 @@ export default async function handler(req, res) {
     </div>
     `;
     await resend.emails.send({
-      from: process.env.RESEND_FROM_W,
+      from: process.env.RESEND_FROM_2FUN,
       to: record.email,
       subject: "Your 2fun.shops guide: Update, Personalize, and Shop!",
       html: emailTemplate,

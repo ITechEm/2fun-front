@@ -2,6 +2,15 @@ import {mongooseConnect} from "@/lib/mongoose";
 import {Product} from "@/models/Product";
 
 export default async function handle(req, res) {
+  if (req.method === 'GET') {
+  const { limit } = req.query;
+  const products = await Product.find({}, null, {
+    sort: { _id: -1 },
+    limit: limit ? parseInt(limit) : 0,
+  });
+  res.json(products);
+}
+
   await mongooseConnect();
   const {categories, sort, phrase, ...filters} = req.query;
   let [sortField, sortOrder] = (sort || '_id-desc').split('-');
@@ -29,6 +38,7 @@ export default async function handle(req, res) {
       sort:{[sortField]:sortOrder==='asc' ? 1 : -1}
     })
   );
+  
 }
 
 

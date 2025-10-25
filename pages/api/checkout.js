@@ -120,7 +120,7 @@ export default async function handler(req, res) {
 
     try {
       await resend.emails.send({
-        from: process.env.RESEND_FROM_O,
+        from: process.env.RESEND_FROM_2FUN,
         to: [email, process.env.ORDER_REVIEW],
         subject: `Order Confirmation — ${orderNumber}`,
         html: emailHtml,

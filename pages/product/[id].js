@@ -9,7 +9,7 @@ import ProductImages from "@/components/ProductImages";
 import CartIcon from "@/components/icons/CartIcon";
 import FlyingButton from "@/components/FlyingButton";
 import ProductReviews from "@/components/ProductReviews";
-import Layout from "../layout2";
+import Layout from "../layout";
 
 const ColWrapper = styled.div`
   display: grid;

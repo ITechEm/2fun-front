@@ -52,7 +52,7 @@ export default async function handler(req, res) {
 
   try {
     await resend.emails.send({
-      from: process.env.RESEND_FROM_RP,
+      from: process.env.RESEND_FROM_2FUN,
       to: email,
       subject: "Your 2fun.shops reset password link",
       html: emailTemplate,

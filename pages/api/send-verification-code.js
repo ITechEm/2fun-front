@@ -72,9 +72,9 @@ export default async function handler(req, res) {
 
   try {
     await resend.emails.send({
-      from: process.env.RESEND_FROM_CODE,
+      from: process.env.RESEND_FROM_2FUN,
       to: email,
-      subject: `Your 2fun.shops verification code`,
+      subject: `Verify your 2fun.shops Account`,
       html:emailTemplate,
   });
     return res.status(200).json({ message: "Verification email sent successfully."});

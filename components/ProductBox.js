@@ -42,6 +42,12 @@ const Title = styled(Link)`
   color: inherit;
   text-decoration: none;
   margin-left: 5px;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;  
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 const ProductInfoBox = styled.div`

@@ -1,5 +1,6 @@
 import Layout from "@/pages/layout";
 import Featured from "@/components/Featured";
+import HeroSection from "@/components/HeroSection";
 import {Product} from "@/models/Product";
 import {mongooseConnect} from "@/lib/mongoose";
 import NewProducts from "@/components/NewProducts";
@@ -12,7 +13,8 @@ export default function HomePage({featuredProduct,newProducts,wishedNewProducts}
   return (
     <div>
       <Layout>
-      <Featured product={featuredProduct} />
+      {/* <Featured product={featuredProduct} /> */}
+      <HeroSection />
       <NewProducts products={newProducts} wishedProducts={wishedNewProducts} />
       </Layout>
     </div>
