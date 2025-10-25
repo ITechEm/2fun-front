@@ -280,7 +280,7 @@ useEffect(() => {
             <Box>
               <h2>Cart</h2>
               {!cartProducts?.length ? (
-                <div>Looks like you have not added anything to your cart. <br></br>Go ahead and explore our menu’s  </div>
+                <div>Looks like you have not added anything to your cart. <br></br>Go ahead and explore our menu&apos;s  </div>
               ) : (
                 <Table>
                   <thead>
@@ -318,25 +318,25 @@ useEffect(() => {
                 </Table>
               )}
               {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-             <ButtonPay>
-              <Button
-    onClick={() => {
-      if (!session) {
-        setPopupMessage("You should login before placing an order.");
-        return;
-        
-      }
-      
-      if (cartProducts.length === 0) {
-        setPopupMessage("Your cart is empty. Please add items before placing an order.");
-        return;
-      }
-      goToPayment();
-    }}
-    disabled={cartProducts.length === 0}
-  >
-    Place the order
-  </Button>
+              <ButtonPay>
+                <Button
+                    onClick={() => {
+                      if (!session) {
+                        setPopupMessage("You should login before placing an order.");
+                        return;
+                        
+                      }
+                      
+                      if (cartProducts.length === 0) {
+                        setPopupMessage("Your cart is empty. Please add items before placing an order.");
+                        return;
+                      }
+                      goToPayment();
+                    }}
+                    disabled={cartProducts.length === 0}
+                  >
+                    Place the order
+                </Button>
               </ButtonPay> 
             </Box>
           </RevealWrapper>

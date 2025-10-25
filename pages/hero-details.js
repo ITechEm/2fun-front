@@ -5,35 +5,38 @@ import Layout from "./layout";
 import Center from "@/components/Center";
 import ProductsGrid from "@/components/ProductsGrid";
 
-const Section = styled.section`
-  padding: 80px 20px;
-  max-width: 1200px;
-  margin: 0 auto;
+const HeroSection = styled.section`
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;  
+  align-items: flex-start;
+  margin-bottom: 5rem;
+  margin-top: 4rem;
+
+  h1, p {
+    flex: 1;
+  }
 
   img {
-    width: 100%;
-    max-width: 600px;
-    border-radius: 12px;
-    display: block;
-    margin: 0 auto 40px auto;
+    max-width: 100%;
+    height: auto;
+    width: 50%; 
+    object-fit: cover;
+    box-shadow: 0 15px 15px rgba(0,0,0,0.1);
+    border-radius: 10px;
   }
 
-  h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: 48px;
-    text-align: center;
-    margin-bottom: 20px;
-  }
+  
+  @media (max-width: 768px) {
+    flex-direction: column; 
+    align-items: flex-start;
 
-  p {
-    font-size: 18px;
-    color: #444;
-    line-height: 1.6;
-    text-align: center;
-    max-width: 800px;
-    margin: 0 auto 40px auto;
+    img {
+      width: 100%;
+    }
   }
 `;
+
 
 export default function HeroDetailsPage() {
   const [hero, setHero] = useState({ title: "", description: "", image: "" });
@@ -72,14 +75,17 @@ export default function HeroDetailsPage() {
   return (
     <Layout>
       <Center>
-        <Section>
+         <div>
+      <HeroSection>
+        <img src={hero.image} alt={hero.title} />
+        <div>
           <h1>{hero.title}</h1>
           <p>{hero.description}</p>
-          {hero.image && <img src={hero.image} alt={hero.title} />}
-
-          <h2>Suggested Products</h2>
-          <ProductsGrid products={suggested} />
-        </Section>
+        </div>
+      </HeroSection>
+      <h2 style={{ marginBottom: 20 }}>Suggested Products</h2>
+      <ProductsGrid products={suggested} />
+    </div>
       </Center>
     </Layout>
   );

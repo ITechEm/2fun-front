@@ -147,8 +147,8 @@ const Footer = () => {
   };
 
   const handleOSClick = () => {
-    router.push('https://www.instagram.com/');
-  };
+  window.open('https://www.instagram.com/2fun.shops', '_blank');
+};
 
   return (
     <FooterWrapper>

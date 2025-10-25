@@ -9,6 +9,7 @@ import BarsIcon from "@/components/icons/Bars";
 import { usePathname } from 'next/navigation';
 import SearchIcon from "@/components/icons/SearchIcon";
 import XIcon from "@/components/icons/XIcon";
+import { FaInstagram } from "react-icons/fa";
 
 const StyledHeader = styled.header`
   background-color: #f9f9f9;
@@ -193,6 +194,59 @@ const LeftGroup = styled.div`
   }
 `;
 
+const InstagramLink = styled.a`
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 3px;
+  position: relative;
+  color: #333;
+  transition: color 0.2s ease;
+  
+   &:hover {
+      color: #7e74f1;
+    }
+  @media (max-width: 768px) {
+    display: inline-flex;
+    margin-top: 8px; 
+  }
+`;
+
+const MobileCartIcon = styled.div`
+  display: inline-flex;
+  align-items: left;
+  margin-left: 0px;
+
+  @media (min-width: 768px) {
+    display: none;
+  }
+
+  img {
+    width: 25px;
+    height: 25px;
+  }
+
+  span {
+    position: absolute;
+    top: -8px;
+    right: -10px;
+    background-color: #4267b2;
+    color: white;
+    font-size: 10px;
+    border-radius: 50%;
+    padding: 2px 6px;
+    line-height: 1;
+  }
+`;
+
+const DesktopCartIcon = styled.div`
+  display: none;
+
+  @media (min-width: 768px) {
+    display: inline-flex;
+  }
+`;
+
+
 function AuthLinks({ status, userName }) {
   if (status === 'authenticated') {
     return (
@@ -231,46 +285,59 @@ export default function Header({ children }) {
     <StyledHeader>
       <WideCenter>
         <Wrapper>
+          
           <LeftGroup>
-            <Logo href="/">
-              <img src="/logo.png" alt="Logo" />
-            </Logo>
+  <Logo href="/">
+    <img src="/logo.png" alt="Logo" />
+  </Logo>
 
-            <NavButton onClick={handleNavToggle} aria-label="Toggle navigation menu" mobileNavActive={mobileNavActive}>
-              {mobileNavActive ? <XIcon /> : <BarsIcon />}
-            </NavButton>
 
-            <StyledNav mobileNavActive={mobileNavActive} onClick={() => setMobileNavActive(false)}>
-              <NavLink href="/" className={pathname === '/' ? 'active' : ''}>Home</NavLink>
-              <NavLink href="/products" className={pathname === '/products' ? 'active' : ''}>
-                Shop<HotLabel>HOT</HotLabel>
-              </NavLink>
-              <NavLink href="/features" className={pathname === '/features' ? 'active' : ''}>Rent</NavLink>
-              <NavLink href="/blog" className={pathname === '/blog' ? 'active' : ''}>Clothes</NavLink>
-              <NavLink href="/about" className={pathname === '/about' ? 'active' : ''}>About</NavLink>
-              <NavLink href="/contact" className={pathname === '/contact' ? 'active' : ''}>Contact</NavLink>
-              <SideIcons>
-                <Link href={'/search'}><SearchIcon /></Link>
+  <MobileCartIcon style={{ marginLeft: '90px' , marginTop: '5px' }}>
+    <Link href="/cart">
+      <IconBadge>
+        <img src="/cart.svg" alt="Cart" />
+        {cartProducts.length > 0 && <span>{cartProducts.length}</span>}
+      </IconBadge>
+    </Link>
+  </MobileCartIcon>
+  <NavButton
+    onClick={handleNavToggle}
+    aria-label="Toggle navigation menu"
+    mobileNavActive={mobileNavActive}
+  >
+    {mobileNavActive ? <XIcon /> : <BarsIcon />}
+  </NavButton>
+  <StyledNav mobileNavActive={mobileNavActive} onClick={() => setMobileNavActive(false)}>
+    <NavLink href="/" className={pathname === '/' ? 'active' : ''}>Home</NavLink>
+    <NavLink href="/products" className={pathname === '/products' ? 'active' : ''}>
+      Shop<HotLabel>HOT</HotLabel>
+    </NavLink>
+    <NavLink href="/features" className={pathname === '/features' ? 'active' : ''}>Rent</NavLink>
+    <NavLink href="/blog" className={pathname === '/blog' ? 'active' : ''}>Clothes</NavLink>
+    <NavLink href="/contact" className={pathname === '/contact' ? 'active' : ''}>Contact</NavLink>
 
-                <NavLink href="/cart">
-                  <IconBadge>
-                    <img src="/cart.svg" alt="Cart" />
-                    {cartProducts.length > 0 && <span>{cartProducts.length}</span>}
-                  </IconBadge>
-                </NavLink>
+    <InstagramLink href="https://www.instagram.com/2fun.shops" target="_blank" rel="noopener noreferrer">
+      <FaInstagram size={20} />
+    </InstagramLink>
 
-                <AuthLinks status={status} userName={userName} />
-              </SideIcons>
-            </StyledNav>
-          </LeftGroup>
+    <SideIcons>
+      <Link href={'/search'}><SearchIcon /></Link>
+      <DesktopCartIcon>
+        <NavLink href="/cart">
+          <IconBadge>
+            <img src="/cart.svg" alt="Cart" />
+            {cartProducts.length > 0 && <span>{cartProducts.length}</span>}
+          </IconBadge>
+        </NavLink>
+      </DesktopCartIcon>
+
+      <AuthLinks status={status} userName={userName} />
+    </SideIcons>
+  </StyledNav>
+</LeftGroup>
           
         </Wrapper>
       </WideCenter>
     </StyledHeader>
   );
 }
-
-
-
-
-
