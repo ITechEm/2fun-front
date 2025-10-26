@@ -311,7 +311,7 @@ useEffect(() => {
                     ))}
                     
                     <tr className="subtotal total">
-                      <td colSpan={2}>Total products price</td>
+                      <td colSpan={2}>Total products price (without shipping costs)</td>
                       <td>€{productsTotal + parseInt(shippingFee || 0)}</td>
                     </tr>
                   </tbody>

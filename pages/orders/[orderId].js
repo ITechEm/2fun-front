@@ -6,6 +6,7 @@ import Layout from "../layout2";
 import Spinner from "@/components/Spinner";
 import { useSession } from "next-auth/react";
 
+
 const OrderDetailContainer = styled.div`
   padding: 20px;
   background-color: #fff;
@@ -121,10 +122,77 @@ const getStatusColor = (status) => {
   }
 };
 
+const CancelButton = styled.button`
+  background-color: #ef4444; /* Red */
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 5px;
+  margin-bottom: 20px;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #f87171; /* Darker Red */
+  }
+
+  &:disabled {
+    background-color: #d1d5db; /* Gray */
+    cursor: not-allowed;
+  }
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+`;
+
+const ModalContent = styled.div`
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  max-width: 400px;
+`;
+
+const ModalButton = styled.button`
+  margin-top: 20px;
+  background-color: #45a049;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  
+  &:hover {
+    background-color: #4CAF50;
+  }
+`;
+
+const ModalButtonDanger = styled(ModalButton)`
+  background-color: #ef4444;
+  margin-right: 10px;
+  
+  &:hover {
+    background-color: #f87171;
+  }
+`;
+
 const OrderDetailsPage = () => {
   const router = useRouter();
   const { orderId } = router.query;
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+  
 
   const [order, setOrder] = useState(null);
   const [shippingAddress, setShippingAddress] = useState(null);
@@ -134,53 +202,109 @@ const OrderDetailsPage = () => {
 
   const [isPaid, setIsPaid] = useState(false);
   const [isPaying, setIsPaying] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [confirmCancel, setConfirmCancel] = useState(false); 
+
+    useEffect(() => {
+    // Check if session is still loading
+    if (status === "loading") {
+      return; // Do nothing, wait for session to finish loading
+    }
+
+    // If user is not authenticated (session is null or unauthenticated), redirect to homepage
+    if (status === "unauthenticated") {
+      router.push("/");  // Redirect to homepage
+    }
+  }, [status, router]);
 
   useEffect(() => {
-  if (orderId) {
-    setIsLoading(true);
-    axios
-      .get(`/api/orders/${orderId}`)
-      .then((res) => {
-        console.log("Fetched updated order:", res.data);
-        setOrder(res.data);
-        setShippingAddress(res.data.shippingAddress);
-        setIsPaid(res.data.paid === true);
-
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching order:", err);
-        setError("Failed to fetch order details");
-        setIsLoading(false);
-      });
-  }
-}, [orderId]);
-useEffect(() => {
     if (orderId) {
+      setIsLoading(true);
       axios
-        .get(`/api/address`)
+        .get(`/api/orders/${orderId}`)
         .then((res) => {
-          setClientNumber(res.data?.clientNumber || '');
-          setShippingAddress(res.data.shippingAddress);})
+          setOrder(res.data);
+          setShippingAddress(res.data.shippingAddress);
+          setIsLoading(false);
+        })
         .catch((err) => {
-          console.error("Error fetching shipping address:", err);
-          setError("Failed to fetch shipping address");
+          console.error("Error fetching order:", err);
+          setIsLoading(false);
         });
     }
   }, [orderId]);
 
+useEffect(() => {
+  if (orderId) {
+    setIsLoading(true);
+    axios
+      .get(`/api/address`)
+      .then((res) => {
+        console.log("Fetched Shipping Address:", res.data);
+        setClientNumber(res.data?.clientNumber || "");
+        setShippingAddress(res.data);  // Set address data here
+        setIsLoading(false);  // Stop loading once data is set
+      })
+      .catch((err) => {
+        console.error("Error fetching shipping address:", err);
+        setError("Failed to fetch shipping address");
+        setIsLoading(false);  // Stop loading on error
+      });
+  }
+}, [orderId]); 
 
+  const cancelOrder = async () => {
+    try {
+      const response = await axios.put(`/api/orders/${orderId}`, {
+        status: "Cancelled",
+      });
 
+      if (response.status === 200) {
+        setOrder((prevOrder) => ({
+          ...prevOrder,
+          status: "Cancelled",
+        }));
+        setModalVisible(false);
+      }
+    } catch (error) {
+      setError("Failed to cancel the order.");
+    }
+  };
+
+  const handleCancelClick = () => {
+    setModalVisible(true);
+    setConfirmCancel(false);
+  };
+
+  const handleConfirmCancel = () => {
+    setConfirmCancel(true);
+    cancelOrder();
+  };
+
+  const handleCancelClose = () => {
+    setModalVisible(false);
+    setConfirmCancel(false);
+  };
 
   if (error) return <p style={{ color: "red" }}>{error}</p>;
   if (!orderId) return <p>Order not available!</p>;
   if (isLoading) return <Spinner fullWidth />;
 
-  const itemTotal = order.line_items.reduce((acc, item) => {
-    return acc + item.quantity * (item.price_data.unit_amount / 100);
-  }, 0);
 
-  const shippingCost = order.shippingFee ? order.shippingFee / 100 : 0;
+
+if (isLoading || !order) {
+  return <Spinner fullWidth />;  // Or any other loading indicator
+}
+
+// Only proceed if `order` is available
+const itemTotal = order.line_items.reduce((acc, item) => {
+  if (item.price_data && item.price_data.unit_amount) {
+    return acc + item.quantity * (item.price_data.unit_amount);
+  }
+  return acc;
+}, 0);
+
+  const shippingCost = order.shippingFee ? order.shippingFee : 0;
   const totalAmount = itemTotal + shippingCost;
 
   const wrapTextEveryNChars = (text, n = 30) => {
@@ -238,11 +362,23 @@ useEffect(() => {
     setError(null);
 
     try {
-      const cartProducts = order.line_items.flatMap((item) =>
-        Array(item.quantity).fill(
-          item.price_data.product_data._id || item.price_data.product_data.name
-        )
-      );
+      const cartProducts = order.line_items.flatMap((item) => {
+  if (!item.price_data || !item.price_data.product_data) {
+    console.warn(`Missing product data for item:`, item);
+    return [];
+  }
+
+  const productId = item.price_data.product_data._id;
+  const productName = item.price_data.product_data.name;
+
+  if (!productId && !productName) {
+    console.warn(`Item does not have valid product data (missing _id or name):`, item);
+    return [];
+  }
+
+  return Array(item.quantity).fill(productId || productName);
+});
+      
 
       const response = await axios.post("/api/checkout", {
         name: shippingAddress.name,
@@ -271,6 +407,9 @@ useEffect(() => {
     }
   };
   
+   const closeModal = () => {
+    setModalVisible(false);
+  };
 
   return (
     <Layout>
@@ -294,6 +433,27 @@ useEffect(() => {
               <StatusBadge style={{ color: getStatusColor(order.status) }}>
                 {order.status}
               </StatusBadge>
+              
+            {modalVisible && !confirmCancel && (
+              <ModalOverlay>
+                <ModalContent>
+                  <h2>Are you sure you want to cancel the order?</h2>
+                  <div>
+                    <ModalButtonDanger onClick={handleConfirmCancel}>Cancel Order</ModalButtonDanger>
+                    <ModalButton onClick={handleCancelClose}>Keep Order</ModalButton>
+                  </div>
+                </ModalContent>
+              </ModalOverlay>
+            )}
+
+            {modalVisible && confirmCancel && (
+              <ModalOverlay>
+                <ModalContent>
+                  <h2>Order Canceled</h2>
+                  <ModalButton onClick={handleCancelClose}>Close</ModalButton>
+                </ModalContent>
+              </ModalOverlay>
+            )}
             </p>
             <p>
               <strong>Tracking Info:</strong>
@@ -318,11 +478,16 @@ useEffect(() => {
     <strong>Total Payment: </strong>€{totalAmount.toFixed(2)}
   </p>
 
-  {order.isApproved && !isPaid && (
-    <PayButton onClick={handlePayClick} disabled={isPaying}>
-      {isPaying ? "Processing..." : "Pay Now"}
-    </PayButton>
-  )}
+  {order.isApproved && !isPaid && order.status === "In Progress" && (
+  <PayButton onClick={handlePayClick} disabled={isPaying}>
+    {isPaying ? "Processing..." : "Pay Now"}
+  </PayButton>
+)}
+  {order.status === "Pending" && (
+              <CancelButton onClick={handleCancelClick}>
+                Cancel Order
+              </CancelButton>
+            )}
 
   {isPaid && (
     <PayButton disabled>
@@ -342,18 +507,16 @@ useEffect(() => {
             <h3 style={{ marginTop: "20px" }}>Items:</h3>
             <div>
               {order.line_items.map((item, index) => (
-                <div
-                  key={index}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
-                  <p>
-                    {item.quantity} x {item.price_data.product_data.name} - €{" "}
-                    {(item.price_data.unit_amount / 100).toFixed(2)}
-                  </p>
-                </div>
+               <div key={index} style={{ display: "flex", alignItems: "center" }}>
+      <p>
+  {item.quantity} x{" "}
+  {item.price_data && item.price_data.product_data ? item.price_data.product_data.name : "Unknown Product"} 
+  - €{" "}
+  {item.price_data && item.price_data.unit_amount ? (item.price_data.unit_amount).toFixed(2) : "TBD"}
+</p>
+  
+
+</div>
               ))}
             </div>
           </OrderDetailContainer>
