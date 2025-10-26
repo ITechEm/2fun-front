@@ -5,30 +5,41 @@ import { useContext, useState } from "react";
 
 const ButtonWrapper = styled.div`
   position: relative;
+  display: inline-block;
+
   button {
     ${ButtonStyle};
   }
 
   .popup {
     position: absolute;
-    top: 0px;
+    top: -50px; /* move popup higher above button */
+    left: 50%;
+    transform: translateX(-50%);
     background-color: #74f199ff;
     color: white;
-    padding: 5px 12px;
-    border-radius: 8px;
-    font-size: 0.8rem;
+    padding: 10px 16px; /* bigger popup */
+    border-radius: 10px;
+    font-size: 1rem; /* larger text */
+    font-weight: 600;
     opacity: 0;
-    transition: opacity 0.3s;
+    transition: opacity 0.3s, transform 0.3s;
     pointer-events: none;
-    @media (max-width: 768px) {
-      top: 0px;
-      left: 25%;
-      font-size: 0.8rem;
-    }
+    white-space: nowrap;
+    z-index: 10;
   }
 
   .popup.show {
     opacity: 1;
+    transform: translateX(-50%) translateY(-5px); /* slight pop-up animation */
+  }
+
+  @media (max-width: 768px) {
+    .popup {
+      top: -45px;
+      font-size: 0.9rem;
+      padding: 8px 14px;
+    }
   }
 `;
 

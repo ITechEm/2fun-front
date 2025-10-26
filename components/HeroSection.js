@@ -22,10 +22,11 @@ const ContentWrapper = styled.div`
   justify-content: space-between;
   gap: 40px;
   flex-wrap: wrap;
-
+  
   @media (max-width: 768px) {
-    flex-direction: column;
-    text-align: center;
+    flex-direction: column; /* Stack text and image vertically */
+    text-align: center;      /* Center text and image */
+    gap: 30px;               /* Add some spacing between text and image */
   }
 `;
 
@@ -103,10 +104,14 @@ const ImageWrapper = styled.div`
 
   img {
     width: 100%;
-    max-width: 500px;
+    max-width: 400px;        /* Reduce max-width for mobile */
     height: auto;
     object-fit: contain;
     border-radius: 10px;
+  }
+
+  @media (max-width: 768px) {
+    order: -1;  /* Make image appear first on mobile */
   }
 `;
 
