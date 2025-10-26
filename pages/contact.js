@@ -194,7 +194,7 @@ export default function ContactPage() {
 
   const contacts = [
   {  value: "support@2funshops.com", icon: <MdEmail /> },
-  // {  value: "+49 179 7624 - - -", icon: <MdPhone /> },
+  // {  value: "+ - - -", icon: <MdPhone /> },
   {  value: "Dortmund, Deutschland", icon: <MdLocationOn /> },
 ];
 
