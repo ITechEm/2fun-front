@@ -1,8 +1,6 @@
 import { useState, useContext } from "react";
 import styled from "styled-components";
 import { FaShoppingCart, FaHeart } from "react-icons/fa";
-import Center from "@/components/Center";
-import Header from "@/components/Header";
 import { mongooseConnect } from "@/lib/mongoose";
 import { Product } from "@/models/Product";
 import WhiteBox from "@/components/WhiteBox";
@@ -11,7 +9,17 @@ import ProductReviews from "@/components/ProductReviews";
 import Layout from "../layout";
 import { CartContext } from "@/components/CartContext";
 
-// Styled components
+
+
+const CenterProduct = styled.div`
+ max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 20px;
+  margin-bottom: 100px
+  
+  }
+`;
+
 const ColWrapper = styled.div`
   display: grid;
   grid-template-columns: 1fr;
@@ -59,7 +67,6 @@ const ProductDetailsText = styled.p`
 `;
 
 const PriceBox = styled(WhiteBox)`
-  margin-top: 30px;
   padding: 20px;
   text-align: center;
 `;
@@ -82,8 +89,10 @@ const MonthlyRate = styled.div`
 `;
 
 const TitleProduct = styled.h1`
-  margin-top: 20px;
+  margin-top: 40px;
   font-size: 1.5em;
+  margin-bottom: -30px;
+  margin-left: 40px;
 `;
 
 const ButtonsRow = styled.div`
@@ -222,10 +231,18 @@ function AddToCartButton({ _id, children }) {
 export default function ProductPage({ product }) {
   const [isFavorite, setIsFavorite] = useState(false);
   const toggleFavorite = () => setIsFavorite(!isFavorite);
+  const detailsArray = Array.isArray(product.descriptionProductDetails)
+  ? product.descriptionProductDetails
+  : typeof product.descriptionProductDetails === "string"
+    ? product.descriptionProductDetails
+        .split(/\r?\n|,/) // split by newline or comma
+        .map(d => d.trim())
+        .filter(Boolean)
+    : [];
 
   return (
     <Layout>
-      <Center>
+      <CenterProduct>
         <TitleProduct>{product.title}</TitleProduct>
         <ColWrapper>
           <WhiteBox>
@@ -258,14 +275,32 @@ export default function ProductPage({ product }) {
               {product.descriptionText && (
                 <DescriptionText>{product.descriptionText}</DescriptionText>
               )}
-              {product.descriptionProductDetails && (
-                <div>
-                  <h4>Product Details</h4>
-                  <DescriptionText>
-                    {product.descriptionProductDetails}
-                  </DescriptionText>
-                </div>
-              )}
+              <h4>✨Product Details✨</h4>
+{detailsArray.length > 0 ? (
+  <ul
+    style={{
+      listStyleType: "disc",
+      marginLeft: "20px",
+      paddingLeft: "20px",
+      display: "block", // force block layout
+    }}
+  >
+    {detailsArray.map((detail, i) => (
+      <li
+        key={i}
+        style={{
+          display: "list-item", // make sure each item behaves as a list item
+          marginBottom: "6px",  // spacing between items
+        }}
+      >
+        {detail}
+      </li>
+    ))}
+  </ul>
+) : (
+  <p>No details available.</p>
+)}
+
             </DescriptionSection>
 
             <ProductDetails>
@@ -280,7 +315,7 @@ export default function ProductPage({ product }) {
         </ColWrapper>
 
         <ProductReviews product={product} />
-      </Center>
+      </CenterProduct>
     </Layout>
   );
 }
@@ -289,15 +324,41 @@ export default function ProductPage({ product }) {
 export async function getServerSideProps(context) {
   await mongooseConnect();
   const { id } = context.query;
-  const product = await Product.findById(id);
+
+  const product = await Product.findById(id).lean(); // plain JS object
+
+  if (!product) {
+    return { notFound: true };
+  }
+
+  // Deeply convert all ObjectIds to strings
+  const convertObjectIds = (obj) => {
+    if (!obj) return obj;
+    if (Array.isArray(obj)) return obj.map(convertObjectIds);
+    if (obj._bsontype === "ObjectID") return obj.toString();
+    if (typeof obj === "object") {
+      return Object.fromEntries(
+        Object.entries(obj).map(([key, value]) => [key, convertObjectIds(value)])
+      );
+    }
+    return obj;
+  };
+
+  const normalizedProduct = {
+    ...convertObjectIds(product),
+    descriptionProductDetails: Array.isArray(product.descriptionProductDetails)
+      ? product.descriptionProductDetails
+      : product.descriptionProductDetails
+      ? [product.descriptionProductDetails]
+      : [],
+  };
 
   return {
     props: {
-      product: JSON.parse(JSON.stringify(product)),
+      product: normalizedProduct,
     },
   };
 }
-
 
 
 

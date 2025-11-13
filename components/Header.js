@@ -9,7 +9,7 @@ import BarsIcon from "@/components/icons/Bars";
 import { usePathname } from 'next/navigation';
 import SearchIcon from "@/components/icons/SearchIcon";
 import XIcon from "@/components/icons/XIcon";
-import { FaInstagram } from "react-icons/fa";
+import { FaInstagram, FaEtsy } from "react-icons/fa";
 
 const StyledHeader = styled.header`
   background-color: #f9f9f9;
@@ -211,6 +211,24 @@ const InstagramLink = styled.a`
   }
 `;
 
+const EtsyLink = styled.a`
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 3px;
+  position: relative;
+  color: #333;
+  transition: color 0.2s ease;
+  
+   &:hover {
+      color: #7e74f1;
+    }
+  @media (max-width: 768px) {
+    display: inline-flex;
+    margin-top: 8px;
+    margin-left: 20px;
+  }
+`;
+
 const MobileCartIcon = styled.div`
   display: inline-flex;
   align-items: left;
@@ -316,9 +334,24 @@ export default function Header({ children }) {
     <NavLink href="/blog" className={pathname === '/blog' ? 'active' : ''}>Clothes</NavLink>
     <NavLink href="/contact" className={pathname === '/contact' ? 'active' : ''}>Contact</NavLink>
 
-    <InstagramLink href="https://www.instagram.com/2fun.shops" target="_blank" rel="noopener noreferrer">
-      <FaInstagram size={20} />
-    </InstagramLink>
+    <InstagramLink
+  href="https://www.instagram.com/2fun.shops"
+  target="_blank"
+  rel="noopener noreferrer"
+  title="Instagram"
+>
+  <FaInstagram size={20} />
+</InstagramLink>
+
+<EtsyLink
+  href="https://www.etsy.com/shop/2funshops"
+  target="_blank"
+  rel="noopener noreferrer"
+  title="Etsy"
+  
+>
+  <FaEtsy size={20} />
+</EtsyLink>
 
     <SideIcons>
       <Link href={'/search'}><SearchIcon /></Link>

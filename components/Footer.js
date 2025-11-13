@@ -198,9 +198,9 @@ const Footer = () => {
       <FooterBottom>
       <div>
         {/* Other payment icons */}
-        <img src="paypal.png" alt="PayPal" style={{ width: "40px", marginRight: "10px" }} />
-        <img src="visa.png" alt="Visa" style={{ width: "40px", marginRight: "10px" }} />
-        <img src="mastercard.png" alt="MasterCard" style={{ width: "40px", marginRight: "10px" }} />
+        <img src="/paypal.png" alt="PayPal" style={{ width: "40px", marginRight: "10px" }} />
+        <img src="/visa.png" alt="Visa" style={{ width: "40px", marginRight: "10px" }} />
+        <img src="/mastercard.png" alt="MasterCard" style={{ width: "40px", marginRight: "10px" }} />
       </div>
       
       {/* Stripe Logo and Powered by Text */}

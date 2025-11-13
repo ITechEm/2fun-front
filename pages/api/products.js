@@ -1,98 +1,57 @@
-import {mongooseConnect} from "@/lib/mongoose";
-import {Product} from "@/models/Product";
+import { mongooseConnect } from "@/lib/mongoose";
+import { Product } from "@/models/Product";
+import { Category } from "@/models/Category";
+import mongoose from "mongoose";
 
 export default async function handle(req, res) {
-  if (req.method === 'GET') {
-  const { limit } = req.query;
-  const products = await Product.find({}, null, {
-    sort: { _id: -1 },
-    limit: limit ? parseInt(limit) : 0,
-  });
-  res.json(products);
-}
-
   await mongooseConnect();
-  const {categories, sort, phrase, ...filters} = req.query;
-  let [sortField, sortOrder] = (sort || '_id-desc').split('-');
 
-  const productsQuery = {};
-  if (categories) {
-    productsQuery.category = categories.split(',');
-  }
-  if (phrase) {
-    productsQuery['$or'] = [
-      {title:{$regex:phrase,$options:'i'}},
-      {description:{$regex:phrase,$options:'i'}},
-    ];
-  }
-  if (Object.keys(filters).length > 0) {
-    Object.keys(filters).forEach(filterName => {
-      productsQuery['properties.'+filterName] = filters[filterName];
+  const { limit, categories, sort, phrase, ...filters } = req.query;
+  let [sortField, sortOrder] = (sort || "_id-desc").split("-");
+  const sortOptions = { [sortField]: sortOrder === "asc" ? 1 : -1 };
+
+  try {
+    // 🧠 1️⃣ Find all visible categories
+    const visibleCategories = await Category.find({ visible: true }).select("_id");
+    const visibleCategoryIds = visibleCategories.map((cat) => new mongoose.Types.ObjectId(cat._id));
+
+    // 🧠 2️⃣ Build product query
+    const productsQuery = {};
+
+    // Show only products whose category is visible
+    productsQuery.category = { $in: visibleCategoryIds };
+
+    // If user filters by category, include only visible ones from that selection
+    if (categories) {
+      const selectedCategories = categories.split(",").map((id) => new mongoose.Types.ObjectId(id));
+      const allowedCategories = selectedCategories.filter((id) =>
+        visibleCategoryIds.some((visibleId) => visibleId.equals(id))
+      );
+      productsQuery.category = { $in: allowedCategories };
+    }
+
+    if (phrase) {
+      productsQuery["$or"] = [
+        { title: { $regex: phrase, $options: "i" } },
+        { description: { $regex: phrase, $options: "i" } },
+      ];
+    }
+
+    if (Object.keys(filters).length > 0) {
+      Object.keys(filters).forEach((filterName) => {
+        productsQuery[`properties.${filterName}`] = filters[filterName];
+      });
+    }
+
+    // 🧠 3️⃣ Fetch filtered products
+    const products = await Product.find(productsQuery, null, {
+      sort: sortOptions,
+      limit: limit ? parseInt(limit) : 0,
     });
+
+    res.json(products);
+  } catch (error) {
+    console.error("❌ Error fetching products:", error);
+    res.status(500).json({ error: "Failed to fetch products" });
   }
-  console.log(productsQuery);
-  res.json(await Product.find(
-    productsQuery,
-    null,
-    {
-      sort:{[sortField]:sortOrder==='asc' ? 1 : -1}
-    })
-  );
-  
 }
-
-
-// import { mongooseConnect } from "@/lib/mongoose";
-// import { Product } from "@/models/Product";
-
-// export default async function handle(req, res) {
-//   await mongooseConnect();
-//   const { categories, sort, phrase, inStock, ...filters } = req.query;
-
-//   let [sortField, sortOrder] = (sort || '_id-desc').split('-');
-
-//   const productsQuery = {};
-
-//   // Handle filtering by categories
-//   if (categories) {
-//     productsQuery.category = categories.split(',');
-//   }
-
-//   // Handle searching by phrase (title or description)
-//   if (phrase) {
-//     productsQuery['$or'] = [
-//       { title: { $regex: phrase, $options: 'i' } },
-//       { description: { $regex: phrase, $options: 'i' } },
-//     ];
-//   }
-
-//   // Handle filtering by properties (e.g. product specifications)
-//   if (Object.keys(filters).length > 0) {
-//     Object.keys(filters).forEach((filterName) => {
-//       productsQuery['properties.' + filterName] = filters[filterName];
-//     });
-//   }
-
-//   // Handle filtering by inStock status (if provided)
-//   if (inStock) {
-//     productsQuery.inStock = inStock === 'true'; // Convert to boolean
-//   }
-
-//   console.log('Products Query:', productsQuery); // To debug and see the query being used
-
-//   // Return products from the database with sorting and filtering
-//   try {
-//     const products = await Product.find(
-//       productsQuery,
-//       null,
-//       {
-//         sort: { [sortField]: sortOrder === 'asc' ? 1 : -1 }
-//       }
-//     );
-
-//     res.json(products);
-//   } catch (error) {
-//     console.error('Error fetching products:', error);
-//     res.status(500).json({ error: 'Error fetching products' });
-//   }
-// }
