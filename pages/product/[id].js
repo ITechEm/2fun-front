@@ -252,9 +252,9 @@ export default function ProductPage({ product }) {
           <div>
             <PriceBox>
               <Price>{product.price.toFixed(2)}€</Price>
-              <MonthlyRate>
+              {/* <MonthlyRate>
                 Reduced from <span>4€</span>
-              </MonthlyRate>
+              </MonthlyRate> */}
 
               <ButtonsRow>
                 <AddToCartButton _id={product._id}>
