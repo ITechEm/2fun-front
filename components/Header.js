@@ -328,10 +328,10 @@ export default function Header({ children }) {
   <StyledNav mobileNavActive={mobileNavActive} onClick={() => setMobileNavActive(false)}>
     <NavLink href="/" className={pathname === '/' ? 'active' : ''}>Home</NavLink>
     <NavLink href="/products" className={pathname === '/products' ? 'active' : ''}>
-      Shop<HotLabel>HOT</HotLabel>
+      Products<HotLabel>HOT</HotLabel>
     </NavLink>
-    <NavLink href="/features" className={pathname === '/features' ? 'active' : ''}>Rent</NavLink>
-    <NavLink href="/blog" className={pathname === '/blog' ? 'active' : ''}>Clothes</NavLink>
+    {/* <NavLink href="/" className={pathname === '/rent' ? 'active' : ''}>Rent</NavLink>
+    <NavLink href="/" className={pathname === '/clothes' ? 'active' : ''}>Clothes</NavLink> */}
     <NavLink href="/contact" className={pathname === '/contact' ? 'active' : ''}>Contact</NavLink>
 
     <InstagramLink
