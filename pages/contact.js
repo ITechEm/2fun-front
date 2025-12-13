@@ -196,7 +196,7 @@ export default function ContactPage() {
   const contacts = [
   {  value: "support@2funshops.com", icon: <MdEmail /> },
   // {  value: "+ - - -", icon: <MdPhone /> },
-  {  value: "Altena, Deutschland", icon: <MdLocationOn /> },
+  {  value: "Altena, Germany", icon: <MdLocationOn /> },
 ];
 
   const handleChange = (e) => {
