@@ -3,7 +3,7 @@ import Layout from "./layout";
 import Center from "@/components/Center";
 import styled, { keyframes, css } from "styled-components";
 import { MdEmail, MdPhone, MdLocationOn } from "react-icons/md"; 
-import { FaInstagram, FaFacebook } from "react-icons/fa";
+import { FaInstagram, FaFacebook, FaEtsy } from "react-icons/fa";
 
 const Container = styled.div`
   max-width: 800px;
@@ -189,7 +189,8 @@ export default function ContactPage() {
 
   const socials = [
     { name: "2fun.shops", url: "https://instagram.com/2fun.shops", icon: <FaInstagram /> },
-    { name: "Facebook", url: "https://facebook.com/2fun.shops", icon: <FaFacebook /> },
+    // { name: "Facebook", url: "https://facebook.com/2fun.shops", icon: <FaFacebook /> },
+    { name: "Etsy", url: "https://www.etsy.com/shop/2funshops", icon: <FaEtsy /> },
   ];
 
   const contacts = [
