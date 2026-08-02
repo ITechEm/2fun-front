@@ -5,12 +5,12 @@ import { useState } from "react";
 
 const StyledProductsGrid = styled.div`
   display: grid;
-  justify-content: center;
-  grid-template-columns: 1fr 1fr;
   gap: 20px;
-  @media screen and (min-width: 768px) {
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-  }
+  width: 100%;
+  justify-content: start;
+  justify-items: center;
+  align-items: start;
+  grid-template-columns: repeat(auto-fit, 200px);
 `;
 
 const ViewMoreButton = styled.button`
@@ -18,13 +18,14 @@ const ViewMoreButton = styled.button`
   color: white;
   padding: 10px 20px;
   border: none;
-  border-radius: 30px;
+
   cursor: ${props => (props.disabled ? "not-allowed" : "pointer")};
   opacity: ${props => (props.disabled ? 0.5 : 1)};
   margin-top: 20px;
   display: block;
   margin-left: auto;
   margin-right: auto;
+  
 `;
 
 export default function ProductsGrid({ products, wishedProducts = [] }) {

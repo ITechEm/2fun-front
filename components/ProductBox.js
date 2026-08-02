@@ -20,19 +20,27 @@ const ProductWrapper = styled.div`
 `;
 
 const WhiteBox = styled(Link)`
-  background-color: #fff;
-  padding: 20px;
-  height: 300px;
+  background-color: #c29898;
   width: 200px;
-  text-align: center;
+  height: 300px;
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
-  position: relative;
+
   img {
-    max-width: 100%;
-    max-height: 100;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+
+  &:hover img {
+    transform: scale(1.05);
   }
 `;
 
@@ -52,6 +60,7 @@ const Title = styled(Link)`
 
 const ProductInfoBox = styled.div`
   margin-top: 10px;
+  
 `;
 
 const PriceRow = styled.div`
@@ -82,10 +91,17 @@ const WishlistButton = styled.button`
   height: 40px;
   padding: 10px;
   position: absolute;
-  top: 0;
-  right: 0;
-  background: transparent;
+  top: 10px;
+  right: 10px;
+  background: white;
+  border-radius: 50%;
   cursor: pointer;
+  z-index: 10;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   ${props =>
     props.wished
       ? `
@@ -94,8 +110,40 @@ const WishlistButton = styled.button`
       : `
     color:black;
   `}
+
   svg {
-    width: 16px;
+    width: 18px;
+    height: 18px;
+  }
+`;
+
+const SeeButton = styled.button`
+  background: linear-gradient(135deg, #7e74f1, #5b52d6);
+  color: white;
+  border: none;
+  border-radius: 25px;
+
+  padding: 8px 18px;
+  font-size: 0.9rem;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition: all 0.25s ease;
+
+  box-shadow: 0 4px 10px rgba(126,116,241,0.25);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(126,116,241,0.35);
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+
+  @media(max-width: 767px){
+    padding: 7px 15px;
+    font-size: 0.85rem;
   }
 `;
 
@@ -105,11 +153,13 @@ export default function ProductBox({
   description,
   price,
   images,
+  link,
   wished = false,
   onRemoveFromWishlist = () => {},
 }) {
   const { data: session } = useSession(); // Get session data
   const [isWished, setIsWished] = useState(wished);
+  const SUPPORT_LINK = "https://www.instagram.com/2fun.shops/";
 
   function addToWishlist(ev) {
     ev.preventDefault();
@@ -128,24 +178,31 @@ export default function ProductBox({
 
   return (
     <ProductWrapper>
-      <WhiteBox href={`/product/${_id}`}>
-        <div>
-          {/* Only render the Wishlist Button if the user is logged in */}
-          {session && (
-            <WishlistButton wished={isWished} onClick={addToWishlist}>
-              {isWished ? <HeartSolidIcon /> : <HeartOutlineIcon />}
-            </WishlistButton>
-          )}
-          <img src={images?.[0]} alt={title} />
-        </div>
-      </WhiteBox>
+    <WhiteBox href={`/product/${_id}`}>
+  {session && (
+    <WishlistButton wished={isWished} onClick={addToWishlist}>
+      {isWished ? <HeartSolidIcon /> : <HeartOutlineIcon />}
+    </WishlistButton>
+  )}
+
+  <img src={images?.[0]} alt={title} />
+</WhiteBox>
       <Title href={`/product/${_id}`}>{title}</Title>
       <ProductInfoBox>
         <PriceRow>
           <Price>€{price}</Price>
-          <FlyingButton _id={_id} src={images?.[0]}>
+          <a
+          href={link || SUPPORT_LINK}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <SeeButton>
+            {link ? "See on Etsy" : "Ask"}
+          </SeeButton>
+        </a>
+          {/* <FlyingButton _id={_id} src={images?.[0]}>
             Add to cart
-          </FlyingButton>
+          </FlyingButton> */}
         </PriceRow>
       </ProductInfoBox>
     </ProductWrapper>

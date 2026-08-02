@@ -310,14 +310,14 @@ export default function Header({ children }) {
   </Logo>
 
 
-  <MobileCartIcon style={{ marginLeft: '90px' , marginTop: '5px' }}>
+  {/* <MobileCartIcon style={{ marginLeft: '90px' , marginTop: '5px' }}>
     <Link href="/cart">
       <IconBadge>
         <img src="/cart.svg" alt="Cart" />
         {cartProducts.length > 0 && <span>{cartProducts.length}</span>}
       </IconBadge>
     </Link>
-  </MobileCartIcon>
+  </MobileCartIcon> */}
   <NavButton
     onClick={handleNavToggle}
     aria-label="Toggle navigation menu"
@@ -355,14 +355,14 @@ export default function Header({ children }) {
 
     <SideIcons>
       <Link href={'/search'}><SearchIcon /></Link>
-      <DesktopCartIcon>
+      {/* <DesktopCartIcon>
         <NavLink href="/cart">
           <IconBadge>
             <img src="/cart.svg" alt="Cart" />
             {cartProducts.length > 0 && <span>{cartProducts.length}</span>}
           </IconBadge>
         </NavLink>
-      </DesktopCartIcon>
+      </DesktopCartIcon> */}
 
       <AuthLinks status={status} userName={userName} />
     </SideIcons>

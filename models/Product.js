@@ -6,6 +6,7 @@ const ProductSchema = new Schema({
   descriptionTitle: { type: String, required: false },
   descriptionText: { type: String, required: false },
   descriptionProductDetails: { type: String, required: false },
+  link: { type: String },
   price: {type: Number, required: true},
   images: [{type:String}],
   category: {type:mongoose.Types.ObjectId, ref:'Category'},
@@ -15,6 +16,7 @@ const ProductSchema = new Schema({
 }, {
   timestamps: true,
   weight: { type: Number, default: 2 },
+  link: { type: String, default: "" },
 });
 
 export const Product = models.Product || model('Product', ProductSchema);

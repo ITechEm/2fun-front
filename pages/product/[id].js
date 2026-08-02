@@ -193,11 +193,13 @@ const ButtonWrapper = styled.div`
     100% { transform: scale(1); }
   }
 `;
+const SUPPORT_LINK = "https://www.instagram.com/2fun.shops/";
 
 function AddToCartButton({ _id, children }) {
   const { addProduct } = useContext(CartContext);
   const [added, setAdded] = useState(false);
   const [clicked, setClicked] = useState(false);
+  
 
   function handleClick() {
     addProduct(_id);
@@ -257,9 +259,30 @@ export default function ProductPage({ product }) {
               </MonthlyRate> */}
 
               <ButtonsRow>
-                <AddToCartButton _id={product._id}>
+               <a
+  href={product.link || SUPPORT_LINK}
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  <button
+    style={{
+      flex: 1,
+      borderRadius: "8px",
+      padding: "12px",
+      fontSize: "1rem",
+      fontWeight: "600",
+      cursor: "pointer",
+      border: "2px solid #888",
+      background: "#333",
+      color: "white",
+    }}
+  >
+    {product.link ? "See on Etsy" : "Ask"}
+  </button>
+</a>
+                {/* <AddToCartButton _id={product._id}>
                   Add to cart
-                </AddToCartButton>
+                </AddToCartButton> */}
 
                 <AddToFavoriteButton onClick={toggleFavorite}>
                   <FaHeart color={isFavorite ? "red" : "inherit"} />

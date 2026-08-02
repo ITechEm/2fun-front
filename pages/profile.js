@@ -14,6 +14,7 @@ import SingleOrder from '@/components/SingleOrder';
 import Center from '@/components/Center';
 import Layout from './layout';
 import  ConfirmModal from '@/components/ConfirmModal';
+import { useRef } from 'react';
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -84,10 +85,121 @@ const PaginationWrapper = styled.div`
   gap: 8px;
 `;
 
+
+
+const WishlistCarousel = styled.div`
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+`;
+
+const WishlistTrack = styled.div`
+  display: flex;
+  gap: 15px;
+
+  overflow-x: auto;
+  scroll-behavior: smooth;
+
+  padding: 15px 35px;
+
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display:none;
+  }
+
+  > * {
+    flex: 0 0 200px;
+  }
+
+
+  @media(max-width:768px){
+
+    padding:15px 25px;
+
+    gap:12px;
+
+    > * {
+      flex:0 0 160px;
+      width:160px;
+    }
+
+  }
+`;
+
+const CarouselButton = styled.button`
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+
+  z-index:10;
+
+  width:35px;
+  height:35px;
+
+  border-radius:50%;
+  border:none;
+
+  background:black;
+  color:white;
+
+  font-size:22px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  ${props => props.left ? `
+    left:3px;
+  ` : `
+    right:3px;
+  `}
+
+
+  @media(max-width:768px){
+
+    width:30px;
+    height:30px;
+
+    font-size:18px;
+
+  }
+`;
+
+const ProductCarouselItem = styled.div`
+  width:200px;
+
+  display:flex;
+  justify-content:center;
+
+  transform:scale(0.95);
+
+  transition:.2s;
+
+  &:hover{
+    transform:scale(1);
+  }
+`;
+
+const ProductWrapper = styled.div`
+
+width:200px;
+
+@media(max-width:768px){
+  width:160px;
+}
+
+
+button {
+ width:100%;
+}
+
+`;
+
 export default function ProfilePage() {
   const { data: session, status } = useSession();
   
-  const [activeTab, setActiveTab] = useState('Orders');
+  const [activeTab, setActiveTab] = useState('Wishlist');
   const [orders, setOrders] = useState([]);
   const [wishedProducts, setWishedProducts] = useState([]);
   const [wishlistLoaded, setWishlistLoaded] = useState(false);
@@ -125,6 +237,17 @@ export default function ProfilePage() {
     (wishlistPage - 1) * ITEMS_PER_PAGE,
     wishlistPage * ITEMS_PER_PAGE
   );
+
+  const wishlistRef = useRef(null);
+
+function scrollWishlist(direction){
+  if(!wishlistRef.current) return;
+
+  wishlistRef.current.scrollBy({
+    left: direction === 'left' ? -250 : 250,
+    behavior:'smooth'
+  });
+}
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -167,11 +290,17 @@ useEffect(() => {
       });
 
     axios.get('/api/wishlist')
-      .then(res => {
-        setWishedProducts(res.data.map(wp => wp.product));
-        setWishlistLoaded(true);
-        setWishlistPage(1);
-      })
+  .then(res => {
+
+    const products = res.data
+      .map(wp => wp.product)
+      .filter(product => product && product._id);
+
+    setWishedProducts(products);
+    setWishlistLoaded(true);
+    setWishlistPage(1);
+
+  })
       .catch(() => {
         setWishlistLoaded(true);
         setWishedProducts([]);
@@ -295,7 +424,7 @@ useEffect(() => {
             <div>
               <WhiteBox>
                 <Tabs
-                  tabs={['Orders', 'Wishlist']}
+                  tabs={['Wishlist','Orders']}
                   active={activeTab}
                   onChange={setActiveTab}
                 />
@@ -352,16 +481,48 @@ useEffect(() => {
                       </p>
                     ) : (
                       <>
-                        <WishedProductsGrid>
-                          {wishlistToShow.map(wp => (
-                            <ProductBox
-                              key={wp._id}
-                              {...wp}
-                              wished
-                              onRemoveFromWishlist={productRemovedFromWishlist}
-                            />
-                          ))}
-                        </WishedProductsGrid>
+                        <WishlistCarousel>
+
+  {wishlistToShow.length > 3 && (
+    <CarouselButton 
+      left
+      onClick={() => scrollWishlist('left')}
+    >
+      ‹
+    </CarouselButton>
+  )}
+
+
+  <WishlistTrack ref={wishlistRef}>
+
+    {wishlistToShow
+      .filter(wp => wp && wp._id)
+      .map(wp => (
+
+        <ProductCarouselItem key={wp._id}>
+
+<ProductBox
+  {...wp}
+  wished
+  onRemoveFromWishlist={productRemovedFromWishlist}
+/>
+
+</ProductCarouselItem>
+
+    ))}
+
+  </WishlistTrack>
+
+
+  {wishlistToShow.length > 3 && (
+    <CarouselButton 
+      onClick={() => scrollWishlist('right')}
+    >
+      ›
+    </CarouselButton>
+  )}
+
+</WishlistCarousel>
                         {wishlistTotalPages > 1 && (
                          <PaginationWrapper>
                             {[...Array(wishlistTotalPages)].map((_, i) => (
@@ -392,7 +553,7 @@ useEffect(() => {
               </WhiteBox>
             </div>
 
-            <div>
+            {/* <div> //shipping address display
               <WhiteBox>
                 <h2 style={{ marginBottom: '40px', textAlign: 'center' }}>Shipping Address</h2>
 
@@ -462,7 +623,7 @@ useEffect(() => {
                   </>
                 )}
               </WhiteBox>
-            </div>
+            </div> */}
           </ColsWrapper>
         </Center>
       </Layout>

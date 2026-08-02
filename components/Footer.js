@@ -157,10 +157,10 @@ const Footer = () => {
         <FooterSection>
           <SectionTitle>CATEGORIES</SectionTitle>
           <Ul>
-            <li><Button onClick={handleReturnsClick}>Wood</Button></li>
-            <li><Button onClick={handleReturnsClick}>Clothes</Button></li>
-            <li><Button onClick={handleReturnsClick}>Rent</Button></li>
+            <li><Button onClick={handleReturnsClick}>Ceramics</Button></li>
+            <li><Button onClick={handleReturnsClick}>Embroidery</Button></li>
             <li><Button onClick={handleReturnsClick}>3D Print</Button></li>
+            <li><Button onClick={handleReturnsClick}></Button></li>
           </Ul>
         </FooterSection>
 
@@ -168,7 +168,7 @@ const Footer = () => {
         <FooterSection>
           <SectionTitle>HELP</SectionTitle>
           <Ul>
-            <li><Button onClick={handleReturnsClick}>Track Order</Button></li>
+            {/* <li><Button onClick={handleReturnsClick}>Track Order</Button></li> */}
             <li><Button onClick={handleReturnsClick}>Returns</Button></li>
             <li><Button onClick={handleReturnsClick}>FAQs</Button></li>
           </Ul>
