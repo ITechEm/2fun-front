@@ -28,7 +28,7 @@ const InputWrapper = styled.div`
 
 export default function SearchPage() {
 
-  const [phrase, setPhrase] = useState(`&quot;``&quot;`);
+  const [phrase, setPhrase] = useState('');
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -106,7 +106,7 @@ export default function SearchPage() {
 
 
         {!isLoading &&
-          phrase !== `&quot;``&quot;` &&
+          phrase !== '' &&
           products.length === 0 && (
 
           <h2>
