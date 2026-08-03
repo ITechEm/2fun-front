@@ -2,19 +2,17 @@ import Layout from "./layout";
 import Center from "@/components/Center";
 import Input from "@/components/Input";
 import styled from "styled-components";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import ProductsGrid from "@/components/ProductsGrid";
 import { debounce } from "lodash";
 import Spinner from "@/components/Spinner";
-
 
 const SearchInput = styled(Input)`
   padding: 5px 10px;
   border-radius: 5px;
   font-size: 1.4rem;
 `;
-
 
 const InputWrapper = styled.div`
   position: sticky;
@@ -25,109 +23,70 @@ const InputWrapper = styled.div`
   z-index: 10;
 `;
 
-
 export default function SearchPage() {
-
-  const [phrase, setPhrase] = useState('');
+  const [phrase, setPhrase] = useState("");
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const searchProducts = useMemo(
+    () =>
+      debounce(async (searchText) => {
+        try {
+          const { data } = await axios.get(
+            `/api/products?phrase=${encodeURIComponent(searchText)}`
+          );
 
-  const searchProducts = useCallback(
-    debounce(async (searchText) => {
-
-      try {
-
-        const response = await axios.get(
-          `/api/products?phrase=${encodeURIComponent(searchText)}`
-        );
-
-        setProducts(response.data);
-
-      } catch (error) {
-
-        console.error("Search error:", error);
-        setProducts([]);
-
-      } finally {
-
-        setIsLoading(false);
-
-      }
-
-    }, 500),
+          setProducts(data);
+        } catch (error) {
+          console.error("Search error:", error);
+          setProducts([]);
+        } finally {
+          setIsLoading(false);
+        }
+      }, 500),
     []
   );
 
-
   useEffect(() => {
+    const trimmed = phrase.trim();
 
-    if (phrase.trim() !== `&quot;``&quot;`) {
-
+    if (trimmed) {
       setIsLoading(true);
-      searchProducts(phrase);
-
+      searchProducts(trimmed);
     } else {
-
       setProducts([]);
-
+      setIsLoading(false);
+      searchProducts.cancel();
     }
-
 
     return () => {
       searchProducts.cancel();
     };
-
-
-  }, [phrase]);
-
+  }, [phrase, searchProducts]);
 
   return (
-
     <Layout>
-
       <Center>
-
         <InputWrapper>
-
           <SearchInput
             autoFocus
             value={phrase}
             onChange={(ev) => setPhrase(ev.target.value)}
             placeholder="Search for products..."
           />
-
         </InputWrapper>
 
+        {isLoading && <Spinner fullWidth />}
 
-        {isLoading && (
-          <Spinner fullWidth={true} />
+        {!isLoading && phrase.trim() && products.length === 0 && (
+          <h2>{`No products found for query "${phrase}"`}</h2>
         )}
-
-
-        {!isLoading &&
-          phrase !== '' &&
-          products.length === 0 && (
-
-          <h2>
-            No products found for query "{phrase}"
-          </h2>
-
-        )}
-
 
         {!isLoading && products.length > 0 && (
-
-          <ProductsGrid
-            products={products}
-          />
-
+          <ProductsGrid products={products} />
         )}
-
       </Center>
-
     </Layout>
-
   );
 }
 
